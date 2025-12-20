@@ -7,5 +7,17 @@ export default defineConfig({
             input: ['resources/css/app.css', 'resources/js/app.js'],
             refresh: true,
         }),
-    ],
+    ], 
+    // build: {
+    //     rollupOptions: {
+    //         input: {
+    //             app: 'resources/js/app.js',
+    //             dashboard: 'resources/js/dashboard.js'
+    //         }
+    //     }
+    // }
+    
+     
 });
+
+
