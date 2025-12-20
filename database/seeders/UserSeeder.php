@@ -15,6 +15,7 @@ class UserSeeder extends Seeder
     {
         // Create Super Admin
         $superAdminUser = User::create([
+            'name' => 'System Administrator', // Add this line
             'email' => 'admin@hrms.com',
             'password' => Hash::make('password'),
             'email_verified_at' => now(),
@@ -40,6 +41,7 @@ class UserSeeder extends Seeder
 
         // Create HR Admin
         $hrAdminUser = User::create([
+            'name' => 'HR Manager', // Add this line
             'email' => 'hr@hrms.com',
             'password' => Hash::make('password'),
             'email_verified_at' => now(),
@@ -65,6 +67,7 @@ class UserSeeder extends Seeder
 
         // Create Line Manager
         $managerUser = User::create([
+            'name' => 'John Manager', // Add this line
             'email' => 'manager@hrms.com',
             'password' => Hash::make('password'),
             'email_verified_at' => now(),
@@ -90,6 +93,7 @@ class UserSeeder extends Seeder
 
         // Create Regular Employee
         $employeeUser = User::create([
+            'name' => 'Jane Doe', // Add this line
             'email' => 'employee@hrms.com',
             'password' => Hash::make('password'),
             'email_verified_at' => now(),
