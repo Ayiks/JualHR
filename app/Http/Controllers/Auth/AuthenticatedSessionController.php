@@ -28,7 +28,7 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        return $this->redirectBasedOnRole();
     }
 
     /**
@@ -43,5 +43,23 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerateToken();
 
         return redirect('/');
+    }
+
+    /**
+     * Redirect user based on their role
+     */
+    protected function redirectBasedOnRole(): RedirectResponse
+    {
+        $user = Auth::user();
+
+        if ($user->hasRole(['super_admin', 'hr_admin'])) {
+            return redirect()->intended(route('admin.dashboard'));
+        }
+
+        if ($user->hasRole('line_manager')) {
+            return redirect()->intended(route('manager.dashboard'));
+        }
+
+        return redirect()->intended(route('employee.dashboard'));
     }
 }
