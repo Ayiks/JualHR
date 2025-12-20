@@ -11,9 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Drop the incorrect table
+        Schema::dropIfExists('attendances');
+        
+        // Create the correct attendances table
         Schema::create('attendances', function (Blueprint $table) {
-             $table->id();
-            $table->foreignId('employee_id')->constrained()->cascadeOnDelete();
+            $table->id();
+            $table->foreignId('employee_id')->constrained('employees')->onDelete('cascade');
             $table->date('date');
             $table->time('check_in')->nullable();
             $table->time('check_out')->nullable();
