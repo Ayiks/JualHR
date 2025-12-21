@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache;
 
 class EmployeeController extends Controller
 {
@@ -92,8 +93,9 @@ class EmployeeController extends Controller
         try {
             DB::beginTransaction();
 
-            // Create User Account
+            // Create User Account with name
             $user = User::create([
+                'name' => $request->first_name . ' ' . $request->last_name, // ADD THIS
                 'email' => $request->email,
                 'password' => Hash::make($request->password ?? 'password123'),
                 'email_verified_at' => now(),
@@ -141,6 +143,10 @@ class EmployeeController extends Controller
             ]);
 
             DB::commit();
+            
+            // Clear cached data
+            Cache::forget('admin_dashboard_stats');
+            Cache::forget('departments_list');
 
             return redirect()
                 ->route('admin.employees.show', $employee)
@@ -160,7 +166,15 @@ class EmployeeController extends Controller
      */
     public function show(Employee $employee)
     {
-        $employee->load(['department', 'lineManager', 'user.roles', 'subordinates']);
+        // Eager load all needed relationships at once
+        $employee->load([
+            'department', 
+            'lineManager', 
+            'user.roles', 
+            'subordinates' => function($query) {
+                $query->select('id', 'first_name', 'last_name', 'middle_name', 'job_title', 'profile_photo', 'line_manager_id');
+            }
+        ]);
 
         return view('admin.employees.show', compact('employee'));
     }
@@ -230,9 +244,12 @@ class EmployeeController extends Controller
                 'emergency_contact_relationship' => $request->emergency_contact_relationship,
             ]);
 
-            // Update User email if changed
-            if ($employee->user && $employee->user->email !== $request->email) {
-                $employee->user->update(['email' => $request->email]);
+            // Update User email and name if changed
+            if ($employee->user) {
+                $employee->user->update([
+                    'name' => $request->first_name . ' ' . $request->last_name, // ADD THIS
+                    'email' => $request->email
+                ]);
             }
 
             // Update role if provided
@@ -241,6 +258,10 @@ class EmployeeController extends Controller
             }
 
             DB::commit();
+            
+            // Clear cached data
+            Cache::forget('admin_dashboard_stats');
+            Cache::forget('departments_list');
 
             return redirect()
                 ->route('admin.employees.show', $employee)
