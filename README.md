@@ -13,16 +13,6 @@ A comprehensive **Human Resource Management System (HRMS)** built with **Laravel
 - [Environment Configuration](#️-environment-configuration)
 - [Database Setup](#️-database-setup)
 - [Running the Application](#-running-the-application)
-- [User Roles & Permissions](#-user-roles--permissions)
-- [Project Structure](#-project-structure)
-- [Development Workflow](#-development-workflow)
-- [Testing](#-testing)
-- [Deployment](#-deployment)
-- [Troubleshooting](#-troubleshooting)
-- [API Documentation](#-api-documentation)
-- [Contributing](#-contributing)
-- [License](#-license)
-- [Support](#-support)
 
 ---
 
@@ -87,7 +77,82 @@ Ensure the following are installed:
 
 ## 🚀 Installation
 
-### 1. Clone the Repository
-```bash
-git clone <repository-url>
-cd hrms-system
+### 1. Clone the Repositor
+git clone https://github.com/Ayiks/JualHR.git
+- cd hrms-system
+
+### 2. Install PHP Dependencies
+`composer install`
+
+### 3. Install JavaScript Dependencies
+`npm install`
+
+---
+
+## ⚙️ Environment Configuration
+
+### 1. Copy Environment File
+`cp .env.example .env`
+
+### 2. Generate Application Key
+`php artisan key:generate`
+
+### 3. Configure Environment Variables
+- APP_NAME="HRMS"
+- APP_ENV=local
+- APP_DEBUG=true
+- APP_URL=http://localhost:8000
+
+- DB_CONNECTION=mysql
+- DB_HOST=127.0.0.1
+- DB_PORT=3306
+- DB_DATABASE=hrms_db
+- DB_USERNAME=root
+- DB_PASSWORD=
+
+- Mail Configuration
+- MAIL_MAILER=smtp
+- MAIL_HOST=smtp.mailtrap.io
+- MAIL_PORT=2525
+- MAIL_USERNAME=null
+- MAIL_PASSWORD=null
+- MAIL_ENCRYPTION=null
+- MAIL_FROM_ADDRESS="noreply@hrms.com"
+- MAIL_FROM_NAME="HRMS"
+
+File Storage
+- FILESYSTEM_DISK=local
+
+--
+
+## 🗃️ Database Setup
+### 1. Create Database
+in your phpMyAdmin run `CREATE DATABASE hrms_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;` to create database.
+
+### 2. Run Migrations
+`php artisan migrate`
+
+### 3. Seed Database with Initial Data
+`php artisan db:seed`
+This will create:
+- Default user roles (Super Admin, HR Admin, Line Manager, Employee)
+- Leave types (Annual, Sick, Casual, Maternity, Paternity)
+- Sample departments
+- Initial admin user
+
+### 4. Create Storage Link
+`php artisan storage:link`
+
+--
+## 🏃 Running the Application
+
+### Development Server
+`php artisan serve`
+Visit: http://localhost:8000
+
+Default Login Credentials
+After seeding:
+
+- Email: admin@hrms.com
+- Password: password
+- Role: Super Admin
