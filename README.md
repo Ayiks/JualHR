@@ -1,59 +1,93 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# HRMS – Employee Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A comprehensive **Human Resource Management System (HRMS)** built with **Laravel 10.x**, designed to streamline HR operations including employee management, leave tracking, attendance, complaints, policies, surveys, and more.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 📋 Table of Contents
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- [Features](#-features)
+- [Technology Stack](#-technology-stack)
+- [Prerequisites](#-prerequisites)
+- [Installation](#-installation)
+- [Environment Configuration](#️-environment-configuration)
+- [Database Setup](#️-database-setup)
+- [Running the Application](#-running-the-application)
+- [User Roles & Permissions](#-user-roles--permissions)
+- [Project Structure](#-project-structure)
+- [Development Workflow](#-development-workflow)
+- [Testing](#-testing)
+- [Deployment](#-deployment)
+- [Troubleshooting](#-troubleshooting)
+- [API Documentation](#-api-documentation)
+- [Contributing](#-contributing)
+- [License](#-license)
+- [Support](#-support)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## ✨ Features
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### 🏢 Core Modules
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- **Employee Management** – Complete employee profiles, departments, and reporting hierarchy  
+- **Leave Management** – Request, approve, reject leaves with balance tracking  
+- **Time & Attendance** – Daily check-in/out and attendance reports  
+- **Policy Management** – Company policies with version control  
+- **Query / Warning System** – Formal queries, warnings, and disciplinary records  
+- **Complaint Management** – Complaint submission, tracking, and resolution  
+- **Survey System** – Employee feedback, exit interviews, satisfaction surveys  
+- **Onboarding** – New employee document submission and verification  
+- **Document Management** – Secure storage of employee documents  
 
-## Laravel Sponsors
+### 👥 User Roles
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+- **Super Admin** – Full system access and configuration  
+- **HR Admin** – Manage employees, leaves, policies, and queries  
+- **Line Manager** – Approve team leaves and view team reports  
+- **Employee** – Self-service portal for leaves, complaints, and surveys  
 
-### Premium Partners
+---
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## 🛠 Technology Stack
 
-## Contributing
+### Backend
+- **PHP**: 8.2+  
+- **Laravel**: 10.x  
+- **MySQL**: 8.0+  
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Frontend
+- **Tailwind CSS**: 3.x  
+- **Alpine.js**: 3.x  
+- **Chart.js**: Analytics and dashboards  
+- **Laravel Blade**: Templating engine  
 
-## Code of Conduct
+### Packages & Dependencies
+- Laravel Breeze – Authentication scaffolding  
+- Spatie Laravel Permission – Role-based access control  
+- Laravel Excel – Data import/export  
+- DomPDF / TCPDF – PDF generation  
+- Redis – Queue & caching (optional)  
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+---
 
-## Security Vulnerabilities
+## 📦 Prerequisites
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Ensure the following are installed:
 
-## License
+- **PHP 8.2+** with extensions:
+  - BCMath, Ctype, Fileinfo, JSON, Mbstring  
+  - OpenSSL, PDO, Tokenizer, XML
+- **Composer**
+- **Node.js 16+ & npm**
+- **MySQL 8.0+**
+- **Git**
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+
+## 🚀 Installation
+
+### 1. Clone the Repository
+```bash
+git clone <repository-url>
+cd hrms-system
