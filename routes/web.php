@@ -36,15 +36,18 @@ use App\Http\Controllers\Employee\DocumentController as EmployeeDocumentControll
 // ============================================================================
 // PUBLIC ROUTES
 // ============================================================================
-
 Route::get('/', function () {
     return redirect()->route('login');
 });
 
 // ============================================================================
+// AUTHENTICATION ROUTES (must be BEFORE authenticated routes)
+// ============================================================================
+require __DIR__.'/auth.php';
+
+// ============================================================================
 // AUTHENTICATED ROUTES
 // ============================================================================
-
 Route::middleware(['auth', 'active_employee'])->group(function () {
     
     // ========================================================================
@@ -214,5 +217,3 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
-
-require __DIR__.'/auth.php';
