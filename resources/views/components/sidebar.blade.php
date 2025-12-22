@@ -13,7 +13,7 @@
 
 <!-- Sidebar -->
 <aside x-show="true"
-       :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+       :class="sidebarOpen ? 'translate-x-0 z-50' : '-translate-x-full z-0'"
     class="fixed top-16 left-0 z-20 w-64 h-[calc(100vh-4rem)] transition-transform duration-300 ease-in-out bg-white border-r border-gray-200 lg:translate-x-0">    
     <div class="h-full flex flex-col pt-16">
         <div class="flex-1 overflow-y-auto">
