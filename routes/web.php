@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\AttendanceController as AdminAttendanceController
 use App\Http\Controllers\Manager\DashboardController as ManagerDashboardController;
 use App\Http\Controllers\Manager\TeamController;
 use App\Http\Controllers\Manager\LeaveApprovalController;
+use App\Http\Controllers\Manager\AttendanceController as ManagerAttendanceController;
 
 // Employee Controllers
 use App\Http\Controllers\Employee\DashboardController as EmployeeDashboardController;
@@ -112,13 +113,26 @@ Route::middleware(['auth', 'active_employee'])->group(function () {
         });
         
         // Attendance Management
+        // Route::prefix('attendance')->name('attendance.')->group(function () {
+        //     Route::get('/', [AdminAttendanceController::class, 'index'])->name('index');
+        //     Route::get('/create', [AdminAttendanceController::class, 'create'])->name('create');
+        //     Route::post('/', [AdminAttendanceController::class, 'store'])->name('store');
+        //     Route::get('/{attendance}/edit', [AdminAttendanceController::class, 'edit'])->name('edit');
+        //     Route::put('/{attendance}', [AdminAttendanceController::class, 'update'])->name('update');
+        //     Route::get('/export', [AdminAttendanceController::class, 'export'])->name('export');
+        // });
+
+        // Attendance Management
         Route::prefix('attendance')->name('attendance.')->group(function () {
             Route::get('/', [AdminAttendanceController::class, 'index'])->name('index');
             Route::get('/create', [AdminAttendanceController::class, 'create'])->name('create');
             Route::post('/', [AdminAttendanceController::class, 'store'])->name('store');
             Route::get('/{attendance}/edit', [AdminAttendanceController::class, 'edit'])->name('edit');
             Route::put('/{attendance}', [AdminAttendanceController::class, 'update'])->name('update');
+            Route::delete('/{attendance}', [AdminAttendanceController::class, 'destroy'])->name('destroy');
+            Route::get('/report', [AdminAttendanceController::class, 'report'])->name('report');
             Route::get('/export', [AdminAttendanceController::class, 'export'])->name('export');
+            Route::post('/bulk-create', [AdminAttendanceController::class, 'bulkCreate'])->name('bulk-create');
         });
         
         // Reports
@@ -145,6 +159,13 @@ Route::middleware(['auth', 'active_employee'])->group(function () {
         Route::get('/team', [TeamController::class, 'index'])->name('team.index');
         Route::get('/team/{employee}', [TeamController::class, 'show'])->name('team.show');
         Route::get('/team/attendance', [TeamController::class, 'attendance'])->name('team.attendance');
+
+        // Attendance Management
+        Route::prefix('attendance')->name('attendance.')->group(function () {
+        Route::get('/', [ManagerAttendanceController::class, 'index'])->name('index');
+        Route::get('/team', [ManagerAttendanceController::class, 'team'])->name('team');
+        Route::get('/report', [ManagerAttendanceController::class, 'report'])->name('report');
+        });
         
         // Leave Approvals
         Route::prefix('leaves')->name('leaves.')->group(function () {
