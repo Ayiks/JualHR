@@ -70,7 +70,7 @@ class Attendance extends Model
         $this->save();
     }
 
-    protected function calculateWorkHours()
+    public function calculateWorkHours()
     {
         if ($this->check_in && $this->check_out) {
             $checkIn = Carbon::parse($this->check_in);
@@ -101,5 +101,11 @@ class Attendance extends Model
             'on_leave' => 'bg-blue-100 text-blue-800',
             default => 'bg-gray-100 text-gray-800',
         };
+    }
+
+    // Accessor for full name (if needed in queries)
+    public function getFullNameAttribute()
+    {
+        return $this->employee->full_name ?? 'N/A';
     }
 }
