@@ -32,6 +32,7 @@ class StoreEmployeeRequest extends FormRequest
             'date_of_birth' => ['nullable', 'date', 'before:today'],
             'gender' => ['nullable', 'in:male,female,other'],
             
+            
             // Address
             'address' => ['nullable', 'string'],
             'city' => ['nullable', 'string', 'max:100'],
