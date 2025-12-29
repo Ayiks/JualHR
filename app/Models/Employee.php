@@ -141,11 +141,6 @@ class Employee extends Model
         return $this->employment_status === 'active';
     }
 
-    // Scopes
-    public function scopeActive($query)
-    {
-        return $query->where('employment_status', 'active');
-    }
 
     public function scopeInDepartment($query, $departmentId)
     {
@@ -176,21 +171,38 @@ class Employee extends Model
         return $this->hasOne(Attendance::class)->whereDate('date', today());
     }
 
-    /**
-     * Get full name attribute
-     */
-    public function getFullNameAttribute()
-    {
-        return trim($this->first_name . ' ' . $this->middle_name . ' ' . $this->last_name);
-    }
 
     /**
-     * Get initials attribute
-     */
-    public function getInitialsAttribute()
-    {
-        $firstInitial = $this->first_name ? substr($this->first_name, 0, 1) : '';
-        $lastInitial = $this->last_name ? substr($this->last_name, 0, 1) : '';
-        return strtoupper($firstInitial . $lastInitial);
-    }
+ * Get employee's policy acknowledgments
+ */
+public function policyAcknowledgments()
+{
+    return $this->hasMany(PolicyAcknowledgment::class);
+}
+
+/**
+ * Scope for active employees
+ */
+public function scopeActive($query)
+{
+    return $query->where('employment_status', 'active');
+}
+
+/**
+ * Get full name attribute
+ */
+public function getFullNameAttribute()
+{
+    return trim($this->first_name . ' ' . $this->middle_name . ' ' . $this->last_name);
+}
+
+/**
+ * Get initials attribute
+ */
+public function getInitialsAttribute()
+{
+    $firstInitial = $this->first_name ? substr($this->first_name, 0, 1) : '';
+    $lastInitial = $this->last_name ? substr($this->last_name, 0, 1) : '';
+    return strtoupper($firstInitial . $lastInitial);
+}
 }
