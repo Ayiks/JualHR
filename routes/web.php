@@ -206,6 +206,7 @@ Route::middleware(['auth', 'active_employee'])->group(function () {
         // Policies
         Route::get('policies', [PolicyViewController::class, 'index'])->name('policies.index');
         Route::get('policies/{policy}', [PolicyViewController::class, 'show'])->name('policies.show');
+        Route::post('policies/{policy}/acknowledge', [PolicyViewController::class, 'acknowledge'])->name('policies.acknowledge');
         Route::get('policies/{policy}/download', [PolicyViewController::class, 'download'])->name('policies.download');
         
         // Complaints
