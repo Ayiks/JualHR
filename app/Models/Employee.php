@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -19,8 +18,12 @@ class Employee extends Model
         'middle_name',
         'email',
         'phone',
+        'ssnit_number',
+        'ghana_card_number',
+        'tin_number',
         'date_of_birth',
         'gender',
+        'marital_status',
         'address',
         'city',
         'state',
@@ -29,13 +32,27 @@ class Employee extends Model
         'department_id',
         'line_manager_id',
         'job_title',
+        'work_email',
+        'work_phone',
+        'cell_phone',
         'employment_type',
         'employment_status',
         'date_of_joining',
         'date_of_leaving',
         'emergency_contact_name',
+        'emergency_contact_address',
         'emergency_contact_phone',
         'emergency_contact_relationship',
+        'bank_name',
+        'bank_branch',
+        'account_name',
+        'account_number',
+        'spouse_name',
+        'spouse_contact',
+        'number_of_children',
+        'next_of_kin_name',
+        'next_of_kin_dob',
+        'next_of_kin_sex',
         'profile_photo',
     ];
 
@@ -43,6 +60,8 @@ class Employee extends Model
         'date_of_birth' => 'date',
         'date_of_joining' => 'date',
         'date_of_leaving' => 'date',
+        'next_of_kin_dob' => 'date',
+        'number_of_children' => 'integer',
     ];
 
     // Relationships
@@ -131,16 +150,27 @@ class Employee extends Model
         return $this->hasMany(Leave::class, 'approved_by');
     }
 
-    // public function getInitialsAttribute()
-    // {
-    //     return strtoupper(substr($this->first_name, 0, 1) . substr($this->last_name, 0, 1));
-    // }
-
-    public function getIsActiveAttribute()
+    public function policyAcknowledgments()
     {
-        return $this->employment_status === 'active';
+        return $this->hasMany(PolicyAcknowledgment::class);
     }
 
+    // New Relationships
+    public function education()
+    {
+        return $this->hasMany(EmployeeEducation::class);
+    }
+
+    public function children()
+    {
+        return $this->hasMany(EmployeeChild::class);
+    }
+
+    // Scopes
+    public function scopeActive($query)
+    {
+        return $query->where('employment_status', 'active');
+    }
 
     public function scopeInDepartment($query, $departmentId)
     {
@@ -150,6 +180,27 @@ class Employee extends Model
     public function scopeUnderManager($query, $managerId)
     {
         return $query->where('line_manager_id', $managerId);
+    }
+
+    // Accessors
+    public function getFullNameAttribute()
+    {
+        if ($this->attributes['full_name'] ?? null) {
+            return $this->attributes['full_name'];
+        }
+        return trim($this->first_name . ' ' . ($this->middle_name ? $this->middle_name . ' ' : '') . $this->last_name);
+    }
+
+    public function getInitialsAttribute()
+    {
+        $firstInitial = $this->first_name ? substr($this->first_name, 0, 1) : '';
+        $lastInitial = $this->last_name ? substr($this->last_name, 0, 1) : '';
+        return strtoupper($firstInitial . $lastInitial);
+    }
+
+    public function getIsActiveAttribute()
+    {
+        return $this->employment_status === 'active';
     }
 
     // Helper Methods
@@ -163,46 +214,8 @@ class Employee extends Model
         return $this->isManager() || $this->user?->hasRole(['super_admin', 'hr_admin']);
     }
 
-    /**
-     * Get today's attendance record
-     */
     public function todayAttendance()
     {
         return $this->hasOne(Attendance::class)->whereDate('date', today());
     }
-
-
-    /**
- * Get employee's policy acknowledgments
- */
-public function policyAcknowledgments()
-{
-    return $this->hasMany(PolicyAcknowledgment::class);
-}
-
-/**
- * Scope for active employees
- */
-public function scopeActive($query)
-{
-    return $query->where('employment_status', 'active');
-}
-
-/**
- * Get full name attribute
- */
-public function getFullNameAttribute()
-{
-    return trim($this->first_name . ' ' . $this->middle_name . ' ' . $this->last_name);
-}
-
-/**
- * Get initials attribute
- */
-public function getInitialsAttribute()
-{
-    $firstInitial = $this->first_name ? substr($this->first_name, 0, 1) : '';
-    $lastInitial = $this->last_name ? substr($this->last_name, 0, 1) : '';
-    return strtoupper($firstInitial . $lastInitial);
-}
 }
