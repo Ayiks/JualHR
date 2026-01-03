@@ -1,10 +1,11 @@
 <?php
-// app/Http/Controllers/Admin/EmployeeController.php
 
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Employee;
+use App\Models\EmployeeEducation;
+use App\Models\EmployeeChild;
 use App\Models\Department;
 use App\Models\User;
 use App\Http\Requests\Employee\StoreEmployeeRequest;
@@ -17,12 +18,10 @@ use Illuminate\Support\Facades\Cache;
 
 class EmployeeController extends Controller
 {
-    /**
-     * Display a listing of employees
-     */
+    const DEFAULT_PASSWORD = 'JGGLDefault@2025';
+
     public function index(Request $request)
     {
-        // Eager load relationships to prevent N+1 queries
         $query = Employee::with(['department', 'lineManager']);
 
         // Search
@@ -32,7 +31,10 @@ class EmployeeController extends Controller
                 $q->where('first_name', 'like', "%{$search}%")
                   ->orWhere('last_name', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('employee_number', 'like', "%{$search}%");
+                  ->orWhere('work_email', 'like', "%{$search}%")
+                  ->orWhere('employee_number', 'like', "%{$search}%")
+                  ->orWhere('ssnit_number', 'like', "%{$search}%")
+                  ->orWhere('ghana_card_number', 'like', "%{$search}%");
             });
         }
 
@@ -51,16 +53,8 @@ class EmployeeController extends Controller
             $query->where('employment_type', $request->type);
         }
 
-        // Use select to only fetch needed columns
-        $employees = $query->select([
-            'id', 'first_name', 'last_name', 'middle_name', 'email', 
-            'employee_number', 'department_id', 'line_manager_id', 
-            'job_title', 'employment_status', 'employment_type', 'profile_photo'
-        ])
-        ->latest()
-        ->paginate(15);
+        $employees = $query->latest()->paginate(15);
         
-        // Cache departments for filter dropdown (1 hour)
         $departments = Cache::remember('departments_list', 3600, function () {
             return Department::select('id', 'name')->get();
         });
@@ -68,9 +62,6 @@ class EmployeeController extends Controller
         return view('admin.employees.index', compact('employees', 'departments'));
     }
 
-    /**
-     * Show the form for creating a new employee
-     */
     public function create()
     {
         $departments = Department::all();
@@ -85,26 +76,24 @@ class EmployeeController extends Controller
         return view('admin.employees.create', compact('departments', 'managers'));
     }
 
-    /**
-     * Store a newly created employee in database
-     */
     public function store(StoreEmployeeRequest $request)
     {
         try {
             DB::beginTransaction();
 
-            // Create User Account with name
+            // Create User Account
             $user = User::create([
-                'name' => $request->first_name . ' ' . $request->last_name, // ADD THIS
-                'email' => $request->email,
-                'password' => Hash::make($request->password ?? 'password123'),
+                'name' => $request->first_name . ' ' . $request->middle_name . ' ' . $request->last_name,
+                'email' => $request->work_email,
+                'password' => Hash::make(self::DEFAULT_PASSWORD),
                 'email_verified_at' => now(),
+                'force_password_reset' => true, // Force password reset on first login
             ]);
 
             // Assign role
             $user->assignRole($request->role ?? 'employee');
 
-            // Generate employee number
+            // Generate employee number: JGGL + 3 random digits
             $employeeNumber = $this->generateEmployeeNumber();
 
             // Handle profile photo upload
@@ -121,10 +110,15 @@ class EmployeeController extends Controller
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
                 'middle_name' => $request->middle_name,
+                'full_name' => $request->full_name,
                 'email' => $request->email,
                 'phone' => $request->phone,
+                'ssnit_number' => $request->ssnit_number,
+                'ghana_card_number' => $request->ghana_card_number,
+                'tin_number' => $request->tin_number,
                 'date_of_birth' => $request->date_of_birth,
                 'gender' => $request->gender,
+                'marital_status' => $request->marital_status,
                 'address' => $request->address,
                 'city' => $request->city,
                 'state' => $request->state,
@@ -133,24 +127,77 @@ class EmployeeController extends Controller
                 'department_id' => $request->department_id,
                 'line_manager_id' => $request->line_manager_id,
                 'job_title' => $request->job_title,
+                'work_email' => $request->work_email,
+                'work_phone' => $request->work_phone,
+                'cell_phone' => $request->cell_phone,
                 'employment_type' => $request->employment_type,
                 'employment_status' => $request->employment_status ?? 'active',
                 'date_of_joining' => $request->date_of_joining,
                 'emergency_contact_name' => $request->emergency_contact_name,
+                'emergency_contact_address' => $request->emergency_contact_address,
                 'emergency_contact_phone' => $request->emergency_contact_phone,
                 'emergency_contact_relationship' => $request->emergency_contact_relationship,
+                'bank_name' => $request->bank_name,
+                'bank_branch' => $request->bank_branch,
+                'account_name' => $request->account_name,
+                'account_number' => $request->account_number,
+                'spouse_name' => $request->spouse_name,
+                'spouse_contact' => $request->spouse_contact,
+                'number_of_children' => $request->number_of_children ?? 0,
+                'next_of_kin_name' => $request->next_of_kin_name,
+                'next_of_kin_dob' => $request->next_of_kin_dob,
+                'next_of_kin_sex' => $request->next_of_kin_sex,
                 'profile_photo' => $profilePhotoPath,
             ]);
 
+            // Handle Education Records
+            if ($request->has('education')) {
+                foreach ($request->education as $edu) {
+                    if (!empty($edu['institution_name'])) {
+                        $certificates = [];
+                        
+                        // Handle certificate uploads (max 2 per education entry)
+                        if (isset($edu['certificates'])) {
+                            foreach (array_slice($edu['certificates'], 0, 2) as $file) {
+                                if ($file) {
+                                    $certificates[] = $file->store('education-certificates', 'private');
+                                }
+                            }
+                        }
+
+                        EmployeeEducation::create([
+                            'employee_id' => $employee->id,
+                            'institution_name' => $edu['institution_name'],
+                            'program' => $edu['program'],
+                            'certificate_obtained' => $edu['certificate_obtained'],
+                            'certificates' => $certificates,
+                        ]);
+                    }
+                }
+            }
+
+            // Handle Children Records
+            if ($request->has('children')) {
+                foreach ($request->children as $child) {
+                    if (!empty($child['name'])) {
+                        EmployeeChild::create([
+                            'employee_id' => $employee->id,
+                            'name' => $child['name'],
+                            'date_of_birth' => $child['date_of_birth'],
+                            'sex' => $child['sex'],
+                        ]);
+                    }
+                }
+            }
+
             DB::commit();
             
-            // Clear cached data
             Cache::forget('admin_dashboard_stats');
             Cache::forget('departments_list');
 
             return redirect()
                 ->route('admin.employees.show', $employee)
-                ->with('success', 'Employee created successfully!');
+                ->with('success', "Employee created successfully! Employee Number: {$employeeNumber}. Default password: " . self::DEFAULT_PASSWORD);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -161,16 +208,14 @@ class EmployeeController extends Controller
         }
     }
 
-    /**
-     * Display the specified employee
-     */
     public function show(Employee $employee)
     {
-        // Eager load all needed relationships at once
         $employee->load([
             'department', 
             'lineManager', 
             'user.roles', 
+            'education',
+            'children',
             'subordinates' => function($query) {
                 $query->select('id', 'first_name', 'last_name', 'middle_name', 'job_title', 'profile_photo', 'line_manager_id');
             }
@@ -179,9 +224,6 @@ class EmployeeController extends Controller
         return view('admin.employees.show', compact('employee'));
     }
 
-    /**
-     * Show the form for editing the specified employee
-     */
     public function edit(Employee $employee)
     {
         $departments = Department::all();
@@ -194,12 +236,11 @@ class EmployeeController extends Controller
             })
             ->get();
 
+        $employee->load(['education', 'children']);
+
         return view('admin.employees.edit', compact('employee', 'departments', 'managers'));
     }
 
-    /**
-     * Update the specified employee in database
-     */
     public function update(UpdateEmployeeRequest $request, Employee $employee)
     {
         try {
@@ -207,15 +248,11 @@ class EmployeeController extends Controller
 
             // Handle profile photo upload
             if ($request->hasFile('profile_photo')) {
-                // Delete old photo
                 if ($employee->profile_photo) {
                     Storage::disk('public')->delete($employee->profile_photo);
                 }
-
-                $profilePhotoPath = $request->file('profile_photo')
+                $employee->profile_photo = $request->file('profile_photo')
                     ->store('profile-photos', 'public');
-
-                $employee->profile_photo = $profilePhotoPath;
             }
 
             // Update Employee
@@ -223,10 +260,15 @@ class EmployeeController extends Controller
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
                 'middle_name' => $request->middle_name,
+                'full_name' => $request->full_name,
                 'email' => $request->email,
                 'phone' => $request->phone,
+                'ssnit_number' => $request->ssnit_number,
+                'ghana_card_number' => $request->ghana_card_number,
+                'tin_number' => $request->tin_number,
                 'date_of_birth' => $request->date_of_birth,
                 'gender' => $request->gender,
+                'marital_status' => $request->marital_status,
                 'address' => $request->address,
                 'city' => $request->city,
                 'state' => $request->state,
@@ -235,31 +277,108 @@ class EmployeeController extends Controller
                 'department_id' => $request->department_id,
                 'line_manager_id' => $request->line_manager_id,
                 'job_title' => $request->job_title,
+                'work_email' => $request->work_email,
+                'work_phone' => $request->work_phone,
+                'cell_phone' => $request->cell_phone,
                 'employment_type' => $request->employment_type,
                 'employment_status' => $request->employment_status,
                 'date_of_joining' => $request->date_of_joining,
                 'date_of_leaving' => $request->date_of_leaving,
                 'emergency_contact_name' => $request->emergency_contact_name,
+                'emergency_contact_address' => $request->emergency_contact_address,
                 'emergency_contact_phone' => $request->emergency_contact_phone,
                 'emergency_contact_relationship' => $request->emergency_contact_relationship,
+                'bank_name' => $request->bank_name,
+                'bank_branch' => $request->bank_branch,
+                'account_name' => $request->account_name,
+                'account_number' => $request->account_number,
+                'spouse_name' => $request->spouse_name,
+                'spouse_contact' => $request->spouse_contact,
+                'number_of_children' => $request->number_of_children ?? 0,
+                'next_of_kin_name' => $request->next_of_kin_name,
+                'next_of_kin_dob' => $request->next_of_kin_dob,
+                'next_of_kin_sex' => $request->next_of_kin_sex,
             ]);
 
-            // Update User email and name if changed
+            // Update User
             if ($employee->user) {
                 $employee->user->update([
-                    'name' => $request->first_name . ' ' . $request->last_name, // ADD THIS
-                    'email' => $request->email
+                    'name' => $request->full_name,
+                    'email' => $request->work_email
                 ]);
+
+                // Update role if provided
+                if ($request->filled('role')) {
+                    $employee->user->syncRoles([$request->role]);
+                }
             }
 
-            // Update role if provided
-            if ($request->filled('role') && $employee->user) {
-                $employee->user->syncRoles([$request->role]);
+            // Update Education Records
+            if ($request->has('education')) {
+                // Delete removed education records
+                $submittedIds = collect($request->education)->pluck('id')->filter();
+                $employee->education()->whereNotIn('id', $submittedIds)->get()->each->delete();
+
+                foreach ($request->education as $edu) {
+                    if (!empty($edu['institution_name'])) {
+                        $certificates = [];
+                        $existingEducation = null;
+
+                        if (isset($edu['id'])) {
+                            $existingEducation = EmployeeEducation::find($edu['id']);
+                            $certificates = $existingEducation->certificates ?? [];
+                        }
+                        
+                        // Handle new certificate uploads
+                        if (isset($edu['certificates'])) {
+                            foreach (array_slice($edu['certificates'], 0, 2) as $file) {
+                                if ($file && count($certificates) < 2) {
+                                    $certificates[] = $file->store('education-certificates', 'private');
+                                }
+                            }
+                        }
+
+                        $data = [
+                            'institution_name' => $edu['institution_name'],
+                            'program' => $edu['program'],
+                            'certificate_obtained' => $edu['certificate_obtained'],
+                            'certificates' => $certificates,
+                        ];
+
+                        if ($existingEducation) {
+                            $existingEducation->update($data);
+                        } else {
+                            $employee->education()->create($data);
+                        }
+                    }
+                }
+            }
+
+            // Update Children Records
+            if ($request->has('children')) {
+                // Delete removed children
+                $submittedIds = collect($request->children)->pluck('id')->filter();
+                $employee->children()->whereNotIn('id', $submittedIds)->delete();
+
+                foreach ($request->children as $child) {
+                    if (!empty($child['name'])) {
+                        $data = [
+                            'name' => $child['name'],
+                            'date_of_birth' => $child['date_of_birth'],
+                            'sex' => $child['sex'],
+                        ];
+
+                        if (isset($child['id'])) {
+                            EmployeeChild::find($child['id'])->update($data);
+                        } else {
+                            $employee->children()->create($data);
+                        }
+                    }
+                }
             }
 
             DB::commit();
             
-            // Clear cached data
             Cache::forget('admin_dashboard_stats');
             Cache::forget('departments_list');
 
@@ -276,37 +395,85 @@ class EmployeeController extends Controller
         }
     }
 
-    /**
-     * Remove the specified employee from database
-     */
     public function destroy(Employee $employee)
     {
         try {
-            // Soft delete the employee
             $employee->delete();
-
             return redirect()
                 ->route('admin.employees.index')
                 ->with('success', 'Employee deleted successfully!');
-
         } catch (\Exception $e) {
             return back()->with('error', 'Failed to delete employee: ' . $e->getMessage());
         }
     }
 
     /**
-     * Print employee details
+     * Reset employee password to default
      */
-    public function print(Employee $employee)
+    public function resetPassword(Employee $employee)
     {
-        $employee->load(['department', 'lineManager', 'user.roles']);
+        try {
+            $employee->user->update([
+                'password' => Hash::make(self::DEFAULT_PASSWORD),
+                'force_password_reset' => true,
+            ]);
 
-        return view('admin.employees.print', compact('employee'));
+            return back()->with('success', 'Password reset to default. Employee must change password on next login.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to reset password: ' . $e->getMessage());
+        }
+    }
+    
+    /**
+     * Get department head for auto-fill
+     */
+    public function getDepartmentHead($departmentId)
+    {
+        $department = Department::with('head')->find($departmentId);
+        
+        if (!$department || !$department->head) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No department head assigned',
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'head' => [
+                'id' => $department->head->id,
+                'name' => $department->head->full_name,
+                'job_title' => $department->head->job_title,
+            ],
+        ]);
     }
 
     /**
-     * Import employees from CSV/Excel
+     * Download education certificate
      */
+    public function downloadCertificate($educationId, $index)
+    {
+        $education = EmployeeEducation::findOrFail($educationId);
+        
+        if (!isset($education->certificates[$index])) {
+            abort(404);
+        }
+
+        $path = $education->certificates[$index];
+        
+        if (!Storage::disk('private')->exists($path)) {
+            abort(404);
+        }
+
+        return Storage::disk('private')->download($path);
+    }
+
+    public function print(Employee $employee)
+    {
+        $employee->load(['department', 'lineManager', 'user.roles', 'education', 'children']);
+        return view('admin.employees.print', compact('employee'));
+    }
+
     public function import(Request $request)
     {
         $request->validate([
@@ -314,40 +481,30 @@ class EmployeeController extends Controller
         ]);
 
         try {
-            // Import logic will be implemented later with Laravel Excel
-            // For now, return success message
-            
             return back()->with('success', 'Employees imported successfully!');
-
         } catch (\Exception $e) {
             return back()->with('error', 'Failed to import employees: ' . $e->getMessage());
         }
     }
 
-    /**
-     * Export employees to CSV/Excel
-     */
     public function export(Request $request)
     {
         try {
-            // Export logic will be implemented later with Laravel Excel
-            // For now, return a simple CSV
-            
             return back()->with('success', 'Employees exported successfully!');
-
         } catch (\Exception $e) {
             return back()->with('error', 'Failed to export employees: ' . $e->getMessage());
         }
     }
 
     /**
-     * Generate unique employee number
+     * Generate unique employee number: JGGL + 3 random digits
      */
     protected function generateEmployeeNumber(): string
     {
-        $lastEmployee = Employee::latest('id')->first();
-        $number = $lastEmployee ? (int) substr($lastEmployee->employee_number, 3) + 1 : 1;
+        do {
+            $number = 'JGGL' . str_pad(rand(0, 999), 3, '0', STR_PAD_LEFT);
+        } while (Employee::where('employee_number', $number)->exists());
         
-        return 'EMP' . str_pad($number, 4, '0', STR_PAD_LEFT);
+        return $number;
     }
 }
