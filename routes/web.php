@@ -64,6 +64,10 @@ Route::middleware(['auth', 'active_employee'])->group(function () {
         Route::post('employees/import', [EmployeeController::class, 'import'])->name('employees.import');
         Route::get('employees/export', [EmployeeController::class, 'export'])->name('employees.export');
         Route::get('employees/{employee}/print', [EmployeeController::class, 'print'])->name('employees.print');
+        Route::post('employees/{employee}/reset-password', [EmployeeController::class, 'resetPassword'])->name('employees.reset-password');
+        Route::get('employees/education/{education}/certificate/{index}', [EmployeeController::class, 'downloadCertificate'])->name('employees.download-certificate');
+         Route::get('employees/department/{department}/head', [EmployeeController::class, 'getDepartmentHead'])
+        ->name('employees.department-head');
         
         // Department Management
         Route::resource('departments', DepartmentController::class);
@@ -90,6 +94,8 @@ Route::middleware(['auth', 'active_employee'])->group(function () {
         // Query/Warning Management
         Route::resource('queries', QueryController::class);
         Route::put('queries/{query}/close', [QueryController::class, 'close'])->name('queries.close');
+        Route::get('queries/{query}/download', [QueryController::class, 'download'])->name('queries.download');
+        Route::get('queries/response/{response}/download', [QueryController::class, 'downloadResponse'])->name('queries.response.download');
         
         // Complaint Management
         Route::resource('complaints', AdminComplaintController::class);
@@ -217,6 +223,8 @@ Route::middleware(['auth', 'active_employee'])->group(function () {
         Route::get('queries', [QueryResponseController::class, 'index'])->name('queries.index');
         Route::get('queries/{query}', [QueryResponseController::class, 'show'])->name('queries.show');
         Route::post('queries/{query}/respond', [QueryResponseController::class, 'respond'])->name('queries.respond');
+        Route::get('queries/{query}/download', [QueryResponseController::class, 'downloadQuery'])->name('queries.download');
+        Route::get('queries/response/{response}/download', [QueryResponseController::class, 'downloadResponse'])->name('queries.response.download');
         
         // Surveys
         Route::get('surveys', [SurveyResponseController::class, 'index'])->name('surveys.index');
