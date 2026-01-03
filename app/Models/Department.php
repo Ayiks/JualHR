@@ -12,18 +12,49 @@ class Department extends Model
 
     protected $fillable = [
         'name',
+        'code',
         'description',
+        'head_of_department_id',
     ];
 
-    // Relationships
+    /**
+     * Relationships
+     */
     public function employees()
     {
         return $this->hasMany(Employee::class);
     }
 
-    // Accessors & Mutators
+    public function head()
+    {
+        return $this->belongsTo(Employee::class, 'head_of_department_id');
+    }
+
+    /**
+     * Scopes
+     */
+    public function scopeActive($query)
+    {
+        return $query->whereHas('employees', function ($q) {
+            $q->where('employment_status', 'active');
+        });
+    }
+
+    /**
+     * Accessors
+     */
     public function getEmployeeCountAttribute()
     {
         return $this->employees()->count();
+    }
+
+    public function getActiveEmployeeCountAttribute()
+    {
+        return $this->employees()->where('employment_status', 'active')->count();
+    }
+
+    public function getHasHeadAttribute()
+    {
+        return !is_null($this->head_of_department_id);
     }
 }
