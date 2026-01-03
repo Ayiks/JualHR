@@ -1,10 +1,11 @@
 <?php
-// app/Models/QueryResponse.php
 
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class QueryResponse extends Model
 {
@@ -12,27 +13,19 @@ class QueryResponse extends Model
 
     protected $fillable = [
         'query_id',
-        'responded_by',
+        'employee_id',
         'response',
-        'attachment',
+        'document_path',
     ];
 
     // Relationships
-    public function query()
+    public function queryRecord(): BelongsTo
     {
-        return $this->belongsTo(Query::class);
+        return $this->belongsTo(Query::class, 'query_id');
     }
 
-    public function respondedBy()
+    public function employee(): BelongsTo
     {
-        return $this->belongsTo(Employee::class, 'responded_by');
-    }
-
-    // Boot method to update query status
-    protected static function booted()
-    {
-        static::created(function ($response) {
-            $response->query->update(['status' => 'responded']);
-        });
+        return $this->belongsTo(Employee::class, 'employee_id');
     }
 }
