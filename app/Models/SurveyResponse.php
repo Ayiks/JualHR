@@ -1,7 +1,5 @@
 <?php
 
-// app/Models/SurveyResponse.php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,10 +12,12 @@ class SurveyResponse extends Model
     protected $fillable = [
         'survey_id',
         'employee_id',
+        'responses',
         'submitted_at',
     ];
 
     protected $casts = [
+        'responses' => 'array',
         'submitted_at' => 'datetime',
     ];
 
@@ -32,8 +32,23 @@ class SurveyResponse extends Model
         return $this->belongsTo(Employee::class);
     }
 
-    public function answers()
+    // Accessors
+    public function getIsSubmittedAttribute()
     {
-        return $this->hasMany(SurveyAnswer::class);
+        return !is_null($this->submitted_at);
+    }
+
+    // Helper Methods
+    public function getAnswer($questionId)
+    {
+        return $this->responses[$questionId] ?? null;
+    }
+
+    public function setAnswer($questionId, $answer)
+    {
+        $responses = $this->responses ?? [];
+        $responses[$questionId] = $answer;
+        $this->responses = $responses;
+        $this->save();
     }
 }
