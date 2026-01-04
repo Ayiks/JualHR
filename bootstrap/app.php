@@ -7,8 +7,8 @@ use App\Http\Middleware\ForcePasswordReset;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__.'/../routes/web.php',
-        commands: __DIR__.'/../routes/console.php',
+        web: __DIR__ . '/../routes/web.php',
+        commands: __DIR__ . '/../routes/console.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
@@ -16,11 +16,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
             'manager' => \App\Http\Middleware\EnsureUserIsManager::class,
             'active_employee' => \App\Http\Middleware\CheckEmployeeStatus::class,
+            'force.password.reset' => \App\Http\Middleware\ForcePasswordReset::class,
         ]);
     })
-->withMiddleware(function (Middleware $middleware) {
-    $middleware->append(ForcePasswordReset::class);
-})
+    ->withMiddleware(function (Middleware $middleware) {
+        $middleware->append(ForcePasswordReset::class);
+    })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
     })->create();
