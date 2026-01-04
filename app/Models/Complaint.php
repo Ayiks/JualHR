@@ -1,5 +1,4 @@
 <?php
-// app/Models/Complaint.php
 
 namespace App\Models;
 
@@ -63,6 +62,26 @@ class Complaint extends Model
         return $query->where('status', 'closed');
     }
 
+    public function scopeByCategory($query, $category)
+    {
+        return $query->where('category', $category);
+    }
+
+    public function scopeByPriority($query, $priority)
+    {
+        return $query->where('priority', $priority);
+    }
+
+    public function scopeAssignedTo($query, $employeeId)
+    {
+        return $query->where('assigned_to', $employeeId);
+    }
+
+    public function scopeUnassigned($query)
+    {
+        return $query->whereNull('assigned_to');
+    }
+
     // Helper Methods
     public function resolve()
     {
@@ -96,5 +115,42 @@ class Complaint extends Model
             'urgent' => 'bg-red-100 text-red-800',
             default => 'bg-gray-100 text-gray-800',
         };
+    }
+
+    // Additional helper methods for better functionality
+    public function getIsAssignedAttribute()
+    {
+        return !is_null($this->assigned_to);
+    }
+
+    public function getIsResolvedAttribute()
+    {
+        return in_array($this->status, ['resolved', 'closed']);
+    }
+
+    public function canBeViewedBy(Employee $employee)
+    {
+        // HR and Super Admin can view all
+        if ($employee->user->hasRole(['super_admin', 'hr_admin'])) {
+            return true;
+        }
+
+        // Employee can view their own complaints
+        if (!$this->is_anonymous && $this->employee_id === $employee->id) {
+            return true;
+        }
+
+        // Assigned handler can view
+        if ($this->assigned_to === $employee->id) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function canBeRespondedBy(Employee $employee)
+    {
+        return $employee->user->hasRole(['super_admin', 'hr_admin']) ||
+               $this->assigned_to === $employee->id;
     }
 }

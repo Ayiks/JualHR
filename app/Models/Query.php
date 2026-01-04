@@ -1,7 +1,5 @@
 <?php
 
-// app/Models/Query.php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -40,7 +38,13 @@ class Query extends Model
         'closed_at' => 'date',
     ];
 
-    // Scopes - These were missing and causing the error
+    // ADD MISSING SCOPE - This was the cause of the error!
+    public function scopePending($query)
+    {
+        return $query->where('status', 'open');
+    }
+
+    // Scopes - Keep your existing ones
     public function scopeOpen($query)
     {
         return $query->where('status', 'open');
@@ -63,7 +67,7 @@ class Query extends Model
                      ->whereDate('response_deadline', '<', today());
     }
 
-    // Relationships
+    // Relationships - Keep your existing ones
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);
@@ -84,7 +88,7 @@ class Query extends Model
         return $this->hasMany(QueryResponse::class);
     }
 
-    // Helper methods
+    // Helper methods - Keep your existing ones
     public static function generateReferenceNumber(): string
     {
         $prefix = 'QRY';
@@ -116,7 +120,7 @@ class Query extends Model
                $this->response_deadline->isPast();
     }
 
-     public function getTypeBadgeClass(): string
+    public function getTypeBadgeClass(): string
     {
         return match($this->type) {
             'verbal_warning' => 'bg-purple-100 text-purple-800',
