@@ -1,5 +1,4 @@
 <?php
-// app/Models/Survey.php
 
 namespace App\Models;
 
@@ -44,7 +43,7 @@ class Survey extends Model
         return $this->hasMany(SurveyResponse::class);
     }
 
-    // Scopes
+    // Scopes - Keep your existing + add what's needed
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
@@ -63,7 +62,25 @@ class Survey extends Model
                      });
     }
 
-    // Helper Methods
+    public function scopeDraft($query)
+    {
+        return $query->where('is_active', false);
+    }
+
+    public function scopeClosed($query)
+    {
+        return $query->where(function ($q) {
+            $q->where('is_active', false)
+              ->orWhere('end_date', '<', now());
+        });
+    }
+
+    public function scopeUpcoming($query)
+    {
+        return $query->where('start_date', '>', now());
+    }
+
+    // Helper Methods - Keep your existing
     public function isAvailable()
     {
         if (!$this->is_active) {
@@ -86,5 +103,38 @@ class Survey extends Model
     public function hasResponded($employeeId)
     {
         return $this->responses()->where('employee_id', $employeeId)->exists();
+    }
+
+    // Additional useful methods
+    public function getIsActiveAttribute()
+    {
+        return $this->attributes['is_active'] && 
+               (!$this->start_date || $this->start_date <= now()) && 
+               (!$this->end_date || $this->end_date >= now());
+    }
+
+    public function getIsClosedAttribute()
+    {
+        return !$this->attributes['is_active'] || 
+               ($this->end_date && $this->end_date < now());
+    }
+
+    public function getResponseCountAttribute()
+    {
+        return $this->responses()->count();
+    }
+
+    public function isAvailableFor(Employee $employee)
+    {
+        if (!$this->isAvailable()) {
+            return false;
+        }
+
+        // Check if already responded
+        if ($this->hasResponded($employee->id)) {
+            return false;
+        }
+
+        return true;
     }
 }
