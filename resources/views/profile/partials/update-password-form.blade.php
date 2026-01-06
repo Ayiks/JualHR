@@ -1,3 +1,4 @@
+{{-- resources/views/profile/partials/update-password-form.blade.php --}}
 <section>
     <header>
         <h2 class="text-lg font-medium text-gray-900">
@@ -7,6 +8,14 @@
         <p class="mt-1 text-sm text-gray-600">
             {{ __('Ensure your account is using a long, random password to stay secure.') }}
         </p>
+
+        @if(auth()->user()->force_password_reset)
+        <div class="mt-2 p-3 bg-yellow-100 border border-yellow-200 rounded-md">
+            <p class="text-sm text-yellow-800 font-medium">
+                ⚠️ You must change your password before continuing to use the system.
+            </p>
+        </div>
+        @endif
     </header>
 
     <form method="post" action="{{ route('password.update') }}" class="mt-6 space-y-6">
@@ -23,6 +32,7 @@
             <x-input-label for="update_password_password" :value="__('New Password')" />
             <x-text-input id="update_password_password" name="password" type="password" class="mt-1 block w-full" autocomplete="new-password" />
             <x-input-error :messages="$errors->updatePassword->get('password')" class="mt-2" />
+            <p class="mt-1 text-xs text-gray-500">Password must be at least 8 characters long.</p>
         </div>
 
         <div>
