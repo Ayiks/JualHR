@@ -110,7 +110,7 @@ class EmployeeController extends Controller
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
                 'middle_name' => $request->middle_name,
-                'full_name' => $request->full_name,
+                'full_name' => $request->first_name . ' ' . $request->middle_name . ' ' . $request->last_name,
                 'email' => $request->email,
                 'phone' => $request->phone,
                 'ssnit_number' => $request->ssnit_number,
@@ -303,7 +303,7 @@ class EmployeeController extends Controller
             // Update User
             if ($employee->user) {
                 $employee->user->update([
-                    'name' => $request->full_name,
+                    'name' => $request->first_name . ' ' . $request->middle_name . ' ' . $request->last_name,
                     'email' => $request->work_email
                 ]);
 
@@ -465,7 +465,7 @@ class EmployeeController extends Controller
             abort(404);
         }
 
-        return Storage::disk('private')->download($path);
+        return response()->download(Storage::disk('private')->path($path));
     }
 
     public function print(Employee $employee)
