@@ -159,6 +159,16 @@
                         class="py-4 px-1 border-b-2 font-medium text-sm transition-colors">
                     Contact
                 </button>
+                <button @click="activeTab = 'bank'"
+                        :class="activeTab === 'bank' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                        class="py-4 px-1 border-b-2 font-medium text-sm transition-colors">
+                    Bank Details
+                </button>
+                <button @click="activeTab = 'education'"
+                        :class="activeTab === 'education' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                        class="py-4 px-1 border-b-2 font-medium text-sm transition-colors">
+                    Education Details
+                </button>
             </nav>
         </div>
 
@@ -187,7 +197,23 @@
                         <dt class="text-sm font-medium text-gray-500 mb-1">Gender</dt>
                         <dd class="text-sm text-gray-900">{{ $employee->gender ? ucfirst($employee->gender) : 'Not provided' }}</dd>
                     </div>
-                    <div class="md:col-span-2">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500 mb-1">Ghana Card Number</dt>
+                        <dd class="text-sm text-gray-900">{{ $employee->ghana_card_number ?? 'Not provided' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500 mb-1">SSNIT Number</dt>
+                        <dd class="text-sm text-gray-900">{{ $employee->ssnit_number ?? 'Not provided' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500 mb-1">TIN</dt>
+                        <dd class="text-sm text-gray-900">{{ $employee->tin ?? 'Not provided' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500 mb-1">Marital Status</dt>
+                        <dd class="text-sm text-gray-900">{{ $employee->marital_status ?? 'Not provided' }}</dd>
+                    </div>
+                    <div class="">
                         <dt class="text-sm font-medium text-gray-500 mb-1">Address</dt>
                         <dd class="text-sm text-gray-900">
                             @if($employee->address || $employee->city || $employee->state || $employee->country)
@@ -199,6 +225,7 @@
                             @endif
                         </dd>
                     </div>
+                    
                 </div>
             </div>
 
@@ -208,6 +235,10 @@
                     <div>
                         <dt class="text-sm font-medium text-gray-500 mb-1">Employee Number</dt>
                         <dd class="text-sm text-gray-900">{{ $employee->employee_number }}</dd>
+                    </div>
+                     <div>
+                        <dt class="text-sm font-medium text-gray-500 mb-1">Work Email</dt>
+                        <dd class="text-sm text-gray-900">{{ $employee->work_email }}</dd>
                     </div>
                     <div>
                         <dt class="text-sm font-medium text-gray-500 mb-1">Department</dt>
@@ -286,6 +317,102 @@
                         <dd class="text-sm text-gray-900">{{ $employee->emergency_contact_relationship ?? 'Not provided' }}</dd>
                     </div>
                 </div>
+            </div>
+
+            <!-- Bank Tab -->
+            <div x-show="activeTab === 'bank'" x-transition>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500 mb-1">Bank Name</dt>
+                        <dd class="text-sm text-gray-900">{{ $employee->bank_name ?? 'Not provided' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500 mb-1">Account Name</dt>
+                        <dd class="text-sm text-gray-900">{{ $employee->account_name ?? 'Not provided' }}</dd>
+                    </div>
+                     <div>
+                        <dt class="text-sm font-medium text-gray-500 mb-1">Account Number</dt>
+                        <dd class="text-sm text-gray-900">{{ $employee->account_number ?? 'Not provided' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500 mb-1">Branch</dt>
+                        <dd class="text-sm text-gray-900">{{ $employee->bank_branch ?? 'Not assigned' }}</dd>
+                    </div>
+                   
+                </div>
+
+                <!-- Direct Reports -->
+                @if($employee->subordinates->isNotEmpty())
+                <div class="mt-6 pt-6 border-t border-gray-200">
+                    <h4 class="text-sm font-medium text-gray-900 mb-4">Direct Reports ({{ $employee->subordinates->count() }})</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        @foreach($employee->subordinates as $subordinate)
+                        <a href="{{ route('admin.employees.show', $subordinate) }}" 
+                           class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors">
+                            @if($subordinate->profile_photo)
+                                <img class="w-10 h-10 rounded-full" src="{{ Storage::url($subordinate->profile_photo) }}" alt="">
+                            @else
+                                <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-semibold text-sm">
+                                    {{ $subordinate->initials }}
+                                </div>
+                            @endif
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-gray-900 truncate">{{ $subordinate->full_name }}</p>
+                                <p class="text-xs text-gray-500 truncate">{{ $subordinate->job_title }}</p>
+                            </div>
+                        </a>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+            </div>
+
+            <!-- Education Tab -->
+            <div x-show="activeTab === 'education'" x-transition>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500 mb-1">Institution Name</dt>
+                        <dd class="text-sm text-gray-900">{{ $employee->institution_name ?? 'Not provided' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500 mb-1">Program</dt>
+                        <dd class="text-sm text-gray-900">{{ $employee->program ?? 'Not provided' }}</dd>
+                    </div>
+                     <div>
+                        <dt class="text-sm font-medium text-gray-500 mb-1">Certificate</dt>
+                        <dd class="text-sm text-gray-900">{{ $employee->certificate ?? 'Not provided' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500 mb-1">Branch</dt>
+                        <dd class="text-sm text-gray-900">{{ $employee->bank_branch ?? 'Not assigned' }}</dd>
+                    </div>
+                   
+                </div>
+
+                <!-- Direct Reports -->
+                @if($employee->subordinates->isNotEmpty())
+                <div class="mt-6 pt-6 border-t border-gray-200">
+                    <h4 class="text-sm font-medium text-gray-900 mb-4">Direct Reports ({{ $employee->subordinates->count() }})</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        @foreach($employee->subordinates as $subordinate)
+                        <a href="{{ route('admin.employees.show', $subordinate) }}" 
+                           class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors">
+                            @if($subordinate->profile_photo)
+                                <img class="w-10 h-10 rounded-full" src="{{ Storage::url($subordinate->profile_photo) }}" alt="">
+                            @else
+                                <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-semibold text-sm">
+                                    {{ $subordinate->initials }}
+                                </div>
+                            @endif
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-gray-900 truncate">{{ $subordinate->full_name }}</p>
+                                <p class="text-xs text-gray-500 truncate">{{ $subordinate->job_title }}</p>
+                            </div>
+                        </a>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
             </div>
         </div>
     </div>
