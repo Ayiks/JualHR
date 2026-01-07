@@ -273,9 +273,12 @@
 
                     {{-- Personal Email --}}
                     <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Personal Email</label>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Personal Email<span class="text-red-500">*</span></label>
                         <input type="email" name="email" id="email" value="{{ old('email') }}"
                             class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                        @error('personal_email')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     {{-- Work Phone --}}
@@ -756,326 +759,358 @@
 
 @push('scripts')
 <script>
-   function employeeForm() {
-    return {
-        currentStep: 0,
-        photoPreview: null,
-        lineManagerId: '',
-        autoFilledManager: false,
-        steps: [
-            { title: 'Personal' },
-            { title: 'Job Info' },
-            { title: 'Education' },
-            { title: 'Emergency' },
-            { title: 'Bank' },
-            { title: 'Family' },
-            { title: 'Review' }
-        ],
-        
-        // Validate current step before moving to next
-        async nextStep() {
-            if (await this.validateCurrentStep()) {
-                if (this.currentStep < this.steps.length - 1) {
-                    this.currentStep++;
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
+    function employeeForm() {
+        return {
+            currentStep: 0,
+            photoPreview: null,
+            lineManagerId: '',
+            autoFilledManager: false,
+            steps: [{
+                    title: 'Personal'
+                },
+                {
+                    title: 'Job Info'
+                },
+                {
+                    title: 'Education'
+                },
+                {
+                    title: 'Emergency'
+                },
+                {
+                    title: 'Bank'
+                },
+                {
+                    title: 'Family'
+                },
+                {
+                    title: 'Review'
                 }
-            }
-        },
-        
-        previousStep() {
-            if (this.currentStep > 0) {
-                this.currentStep--;
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-        },
-        
-        // Validate fields for current step
-        async validateCurrentStep() {
-            let isValid = true;
-            let errorMessages = [];
-            
-            switch(this.currentStep) {
-                case 0: // Personal Information
-                    isValid = this.validateStep1();
-                    if (!isValid) errorMessages.push('Please fill all required personal information fields');
-                    break;
-                    
-                case 1: // Job Information
-                    isValid = this.validateStep2();
-                    if (!isValid) errorMessages.push('Please fill all required job information fields');
-                    break;
-                    
-                case 2: // Education (optional but if filled, validate)
-                    isValid = this.validateStep3();
-                    if (!isValid) errorMessages.push('Please complete all education fields or remove incomplete entries');
-                    break;
-                    
-                case 3: // Emergency Contact
-                    isValid = this.validateStep4();
-                    if (!isValid) errorMessages.push('Please fill all required emergency contact fields');
-                    break;
-                    
-                case 4: // Bank Details
-                    isValid = this.validateStep5();
-                    if (!isValid) errorMessages.push('Please fill all required bank details');
-                    break;
-                    
-                case 5: // Family
-                    isValid = this.validateStep6();
-                    if (!isValid) errorMessages.push('Please complete all required family information');
-                    break;
-            }
-            
-            if (!isValid) {
-                this.showNotification(errorMessages[0], 'error');
-            }
-            
-            return isValid;
-        },
-        
-        // Step 1: Personal Information Validation
-        validateStep1() {
-            const requiredFields = [,
-                'first_name',
-                'last_name',
-                'address',
-                'phone',
-                'ssnit_number',
-                'ghana_card_number',
-                'date_of_birth',
-                'gender',
-                'marital_status'
-            ];
-            
-            return this.validateFields(requiredFields);
-        },
-        
-        // Step 2: Job Information Validation
-        validateStep2() {
-            const requiredFields = [
-                'job_title',
-                'department_id',
-                'work_email',
-                'work_phone',
-                'cell_phone',
-                'employment_type',
-                'date_of_joining',
-                'role'
-            ];
-            
-            const isValid = this.validateFields(requiredFields);
-            
-            // Additional email validation
-            if (isValid) {
-                const workEmail = document.getElementById('work_email').value;
-                if (!this.isValidEmail(workEmail)) {
-                    this.showNotification('Please enter a valid work email address', 'error');
-                    return false;
+            ],
+
+            // Validate current step before moving to next
+            async nextStep() {
+                if (await this.validateCurrentStep()) {
+                    if (this.currentStep < this.steps.length - 1) {
+                        this.currentStep++;
+                        window.scrollTo({
+                            top: 0,
+                            behavior: 'smooth'
+                        });
+                    }
                 }
-                
-                const personalEmail = document.getElementById('email').value;
-                if (personalEmail && !this.isValidEmail(personalEmail)) {
-                    this.showNotification('Please enter a valid personal email address', 'error');
-                    return false;
+            },
+
+            previousStep() {
+                if (this.currentStep > 0) {
+                    this.currentStep--;
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
                 }
-            }
-            
-            return isValid;
-        },
-        
-        // Step 3: Education Validation (optional, but if started, must complete)
-        validateStep3() {
-            const institutionInputs = document.querySelectorAll('input[name*="[institution_name]"]');
-            
-            for (let input of institutionInputs) {
-                if (input.value.trim()) {
-                    // If institution name is filled, check other required education fields
-                    const index = input.name.match(/\[(\d+)\]/)[1];
-                    const program = document.querySelector(`input[name="education[${index}][program]"]`);
-                    const certificate = document.querySelector(`input[name="education[${index}][certificate_obtained]"]`);
-                    
-                    if (!program.value.trim() || !certificate.value.trim()) {
-                        this.showNotification(`Please complete all fields for education entry ${parseInt(index) + 1}`, 'error');
+            },
+
+            // Validate fields for current step
+            async validateCurrentStep() {
+                let isValid = true;
+                let errorMessages = [];
+
+                switch (this.currentStep) {
+                    case 0: // Personal Information
+                        isValid = this.validateStep1();
+                        if (!isValid) errorMessages.push('Please fill all required personal information fields');
+                        break;
+
+                    case 1: // Job Information
+                        isValid = this.validateStep2();
+                        if (!isValid) errorMessages.push('Please fill all required job information fields');
+                        break;
+
+                    case 2: // Education (optional but if filled, validate)
+                        isValid = this.validateStep3();
+                        if (!isValid) errorMessages.push('Please complete all education fields or remove incomplete entries');
+                        break;
+
+                    case 3: // Emergency Contact
+                        isValid = this.validateStep4();
+                        if (!isValid) errorMessages.push('Please fill all required emergency contact fields');
+                        break;
+
+                    case 4: // Bank Details
+                        isValid = this.validateStep5();
+                        if (!isValid) errorMessages.push('Please fill all required bank details');
+                        break;
+
+                    case 5: // Family
+                        isValid = this.validateStep6();
+                        if (!isValid) errorMessages.push('Please complete all required family information');
+                        break;
+                }
+
+                if (!isValid) {
+                    this.showNotification(errorMessages[0], 'error');
+                }
+
+                return isValid;
+            },
+
+            // Step 1: Personal Information Validation
+            validateStep1() {
+                const requiredFields = [,
+                    'first_name',
+                    'last_name',
+                    'address',
+                    'phone',
+                    'ssnit_number',
+                    'ghana_card_number',
+                    'date_of_birth',
+                    'gender',
+                    'marital_status'
+                ];
+
+                return this.validateFields(requiredFields);
+            },
+
+            // Step 2: Job Information Validation
+            validateStep2() {
+                const requiredFields = [
+                    'job_title',
+                    'department_id',
+                    'work_email',
+                    'personal_email',
+                    'work_phone',
+                    'cell_phone',
+                    'employment_type',
+                    'date_of_joining',
+                    'role'
+                ];
+
+                const isValid = this.validateFields(requiredFields);
+
+                // Additional email validation
+                if (isValid) {
+                    const workEmail = document.getElementById('work_email').value;
+                    if (!this.isValidEmail(workEmail)) {
+                        this.showNotification('Please enter a valid work email address', 'error');
+                        return false;
+                    }
+
+                    const personalEmail = document.getElementById('email').value;
+                    if (personalEmail && !this.isValidEmail(personalEmail)) {
+                        this.showNotification('Please enter a valid personal email address', 'error');
                         return false;
                     }
                 }
-            }
-            
-            return true;
-        },
-        
-        // Step 4: Emergency Contact Validation
-        validateStep4() {
-            const requiredFields = [
-                'emergency_contact_name',
-                'emergency_contact_address',
-                'emergency_contact_phone',
-                'emergency_contact_relationship'
-            ];
-            
-            return this.validateFields(requiredFields);
-        },
-        
-        // Step 5: Bank Details Validation
-        validateStep5() {
-            const requiredFields = [
-                'bank_name',
-                'bank_branch',
-                'account_name',
-                'account_number'
-            ];
-            
-            return this.validateFields(requiredFields);
-        },
-        
-        // Step 6: Family Validation
-        validateStep6() {
-            const requiredFields = [
-                'next_of_kin_name',
-                'next_of_kin_dob',
-                'next_of_kin_sex'
-            ];
-            
-            const isValid = this.validateFields(requiredFields);
-            
-            // Validate children if number_of_children > 0
-            if (isValid) {
-                const numberOfChildren = parseInt(document.querySelector('input[name="number_of_children"]').value) || 0;
-                
-                if (numberOfChildren > 0) {
-                    const childNameInputs = document.querySelectorAll('input[name*="children"][name*="[name]"]');
-                    
-                    if (childNameInputs.length < numberOfChildren) {
-                        this.showNotification(`Please add information for all ${numberOfChildren} children`, 'error');
-                        return false;
-                    }
-                    
-                    // Validate each child entry
-                    for (let i = 0; i < numberOfChildren; i++) {
-                        const name = document.querySelector(`input[name="children[${i}][name]"]`);
-                        const dob = document.querySelector(`input[name="children[${i}][date_of_birth]"]`);
-                        const sex = document.querySelector(`select[name="children[${i}][sex]"]`);
-                        
-                        if (!name || !name.value.trim() || !dob || !dob.value || !sex || !sex.value) {
-                            this.showNotification(`Please complete all fields for child ${i + 1}`, 'error');
+
+                return isValid;
+            },
+
+            // Step 3: Education Validation (optional, but if started, must complete)
+            validateStep3() {
+                const institutionInputs = document.querySelectorAll('input[name*="[institution_name]"]');
+
+                for (let input of institutionInputs) {
+                    if (input.value.trim()) {
+                        // If institution name is filled, check other required education fields
+                        const index = input.name.match(/\[(\d+)\]/)[1];
+                        const program = document.querySelector(`input[name="education[${index}][program]"]`);
+                        const certificate = document.querySelector(`input[name="education[${index}][certificate_obtained]"]`);
+
+                        if (!program.value.trim() || !certificate.value.trim()) {
+                            this.showNotification(`Please complete all fields for education entry ${parseInt(index) + 1}`, 'error');
                             return false;
                         }
                     }
                 }
-            }
-            
-            return isValid;
-        },
-        
-        // Generic field validation helper
-        validateFields(fieldNames) {
-            for (let fieldName of fieldNames) {
-                const field = document.getElementById(fieldName) || 
-                             document.querySelector(`[name="${fieldName}"]`);
-                
-                if (!field) {
-                    console.warn(`Field ${fieldName} not found`);
-                    continue;
+
+                return true;
+            },
+
+            // Step 4: Emergency Contact Validation
+            validateStep4() {
+                const requiredFields = [
+                    'emergency_contact_name',
+                    'emergency_contact_address',
+                    'emergency_contact_phone',
+                    'emergency_contact_relationship'
+                ];
+
+                return this.validateFields(requiredFields);
+            },
+
+            // Step 5: Bank Details Validation
+            validateStep5() {
+                const requiredFields = [
+                    'bank_name',
+                    'bank_branch',
+                    'account_name',
+                    'account_number'
+                ];
+
+                return this.validateFields(requiredFields);
+            },
+
+            // Step 6: Family Validation
+            validateStep6() {
+                const requiredFields = [
+                    'next_of_kin_name',
+                    'next_of_kin_dob',
+                    'next_of_kin_sex'
+                ];
+
+                const isValid = this.validateFields(requiredFields);
+
+                // Validate children if number_of_children > 0
+                if (isValid) {
+                    const numberOfChildren = parseInt(document.querySelector('input[name="number_of_children"]').value) || 0;
+
+                    if (numberOfChildren > 0) {
+                        const childNameInputs = document.querySelectorAll('input[name*="children"][name*="[name]"]');
+
+                        if (childNameInputs.length < numberOfChildren) {
+                            this.showNotification(`Please add information for all ${numberOfChildren} children`, 'error');
+                            return false;
+                        }
+
+                        // Validate each child entry
+                        for (let i = 0; i < numberOfChildren; i++) {
+                            const name = document.querySelector(`input[name="children[${i}][name]"]`);
+                            const dob = document.querySelector(`input[name="children[${i}][date_of_birth]"]`);
+                            const sex = document.querySelector(`select[name="children[${i}][sex]"]`);
+
+                            if (!name || !name.value.trim() || !dob || !dob.value || !sex || !sex.value) {
+                                this.showNotification(`Please complete all fields for child ${i + 1}`, 'error');
+                                return false;
+                            }
+                        }
+                    }
                 }
-                
-                const value = field.value.trim();
-                
-                if (!value) {
-                    // Highlight the field
-                    field.classList.add('border-red-500', 'ring-red-500');
-                    field.focus();
-                    
-                    // Get field label
-                    const label = document.querySelector(`label[for="${fieldName}"]`);
-                    const fieldLabel = label ? label.textContent.replace('*', '').trim() : fieldName;
-                    
-                    this.showNotification(`${fieldLabel} is required`, 'error');
-                    
-                    // Remove highlight after 3 seconds
-                    setTimeout(() => {
-                        field.classList.remove('border-red-500', 'ring-red-500');
-                    }, 3000);
-                    
-                    return false;
+
+                return isValid;
+            },
+
+            // Generic field validation helper
+            validateFields(fieldNames) {
+                for (let fieldName of fieldNames) {
+                    const field = document.getElementById(fieldName) ||
+                        document.querySelector(`[name="${fieldName}"]`);
+
+                    if (!field) {
+                        console.warn(`Field ${fieldName} not found`);
+                        continue;
+                    }
+
+                    const value = field.value.trim();
+
+                    if (!value) {
+                        // Highlight the field
+                        field.classList.add('border-red-500', 'ring-red-500');
+                        field.focus();
+
+                        // Get field label
+                        const label = document.querySelector(`label[for="${fieldName}"]`);
+                        const fieldLabel = label ? label.textContent.replace('*', '').trim() : fieldName;
+
+                        this.showNotification(`${fieldLabel} is required`, 'error');
+
+                        // Remove highlight after 3 seconds
+                        setTimeout(() => {
+                            field.classList.remove('border-red-500', 'ring-red-500');
+                        }, 3000);
+
+                        return false;
+                    }
                 }
-            }
-            
-            return true;
-        },
-        
-        // Email validation helper
-        isValidEmail(email) {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return emailRegex.test(email);
-        },
-        
-        previewPhoto(event) {
-            const file = event.target.files[0];
-            if (file) {
-                // Validate file size (2MB)
-                if (file.size > 2 * 1024 * 1024) {
-                    this.showNotification('Profile photo must be less than 2MB', 'error');
-                    event.target.value = '';
+
+                return true;
+            },
+
+            // Email validation helper
+            isValidEmail(email) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return emailRegex.test(email);
+            },
+
+            previewPhoto(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    // Validate file size (2MB)
+                    if (file.size > 2 * 1024 * 1024) {
+                        this.showNotification('Profile photo must be less than 2MB', 'error');
+                        event.target.value = '';
+                        return;
+                    }
+
+                    // Validate file type
+                    if (!file.type.match('image/(jpg|jpeg|png)')) {
+                        this.showNotification('Profile photo must be JPG or PNG', 'error');
+                        event.target.value = '';
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        this.photoPreview = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            },
+
+            async fetchDepartmentHead(departmentId) {
+                if (!departmentId) {
+                    this.lineManagerId = '';
+                    this.autoFilledManager = false;
                     return;
                 }
-                
-                // Validate file type
-                if (!file.type.match('image/(jpg|jpeg|png)')) {
-                    this.showNotification('Profile photo must be JPG or PNG', 'error');
-                    event.target.value = '';
-                    return;
+
+                try {
+                    const response = await fetch(`/admin/employees/department/${departmentId}/head`);
+                    const data = await response.json();
+
+                    if (data.success && data.head) {
+                        this.lineManagerId = data.head.id;
+                        this.autoFilledManager = true;
+                        this.showNotification('Line manager auto-filled with department head: ' + data.head.name, 'success');
+                    } else {
+                        this.autoFilledManager = false;
+                        this.showNotification('No department head assigned. Please select a line manager manually.', 'info');
+                    }
+                } catch (error) {
+                    console.error('Error fetching department head:', error);
+                    this.autoFilledManager = false;
                 }
-                
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    this.photoPreview = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        },
-        
-        async fetchDepartmentHead(departmentId) {
-            if (!departmentId) {
+            },
+
+            clearLineManager() {
                 this.lineManagerId = '';
                 this.autoFilledManager = false;
-                return;
-            }
+            },
 
-            try {
-                const response = await fetch(`/admin/employees/department/${departmentId}/head`);
-                const data = await response.json();
+            showNotification(message, type = 'success') {
+                const colors = {
+                    success: {
+                        bg: 'bg-green-100',
+                        border: 'border-green-400',
+                        text: 'text-green-700'
+                    },
+                    error: {
+                        bg: 'bg-red-100',
+                        border: 'border-red-400',
+                        text: 'text-red-700'
+                    },
+                    info: {
+                        bg: 'bg-blue-100',
+                        border: 'border-blue-400',
+                        text: 'text-blue-700'
+                    }
+                };
 
-                if (data.success && data.head) {
-                    this.lineManagerId = data.head.id;
-                    this.autoFilledManager = true;
-                    this.showNotification('Line manager auto-filled with department head: ' + data.head.name, 'success');
-                } else {
-                    this.autoFilledManager = false;
-                    this.showNotification('No department head assigned. Please select a line manager manually.', 'info');
-                }
-            } catch (error) {
-                console.error('Error fetching department head:', error);
-                this.autoFilledManager = false;
-            }
-        },
-        
-        clearLineManager() {
-            this.lineManagerId = '';
-            this.autoFilledManager = false;
-        },
-        
-        showNotification(message, type = 'success') {
-            const colors = {
-                success: { bg: 'bg-green-100', border: 'border-green-400', text: 'text-green-700' },
-                error: { bg: 'bg-red-100', border: 'border-red-400', text: 'text-red-700' },
-                info: { bg: 'bg-blue-100', border: 'border-blue-400', text: 'text-blue-700' }
-            };
-            
-            const color = colors[type] || colors.info;
-            
-            const notification = document.createElement('div');
-            notification.className = `fixed top-4 right-4 ${color.bg} border ${color.border} ${color.text} px-4 py-3 rounded-lg shadow-lg z-50 max-w-md`;
-            notification.innerHTML = `
+                const color = colors[type] || colors.info;
+
+                const notification = document.createElement('div');
+                notification.className = `fixed top-4 right-4 ${color.bg} border ${color.border} ${color.text} px-4 py-3 rounded-lg shadow-lg z-50 max-w-md`;
+                notification.innerHTML = `
                 <div class="flex items-start gap-2">
                     <span class="flex-1">${message}</span>
                     <button onclick="this.parentElement.parentElement.remove()" class="text-current opacity-70 hover:opacity-100">
@@ -1085,25 +1120,25 @@
                     </button>
                 </div>
             `;
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.remove();
-            }, 5000);
-        },
-        
-        submitForm(event) {
-            // Final validation before submit
-            if (!document.getElementById('privacy_consent')?.checked) {
-                event.preventDefault();
-                this.showNotification('Please accept the privacy consent to continue', 'error');
-                return false;
+                document.body.appendChild(notification);
+
+                setTimeout(() => {
+                    notification.remove();
+                }, 5000);
+            },
+
+            submitForm(event) {
+                // Final validation before submit
+                if (!document.getElementById('privacy_consent')?.checked) {
+                    event.preventDefault();
+                    this.showNotification('Please accept the privacy consent to continue', 'error');
+                    return false;
+                }
+
+                event.target.submit();
             }
-            
-            event.target.submit();
         }
     }
-}
 
     function educationManager() {
         return {
