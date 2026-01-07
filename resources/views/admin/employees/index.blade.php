@@ -139,7 +139,7 @@
                                         {{ $employee->full_name }}
                                     </div>
                                     <div class="text-sm text-gray-500">
-                                        {{ $employee->email }}
+                                        {{ $employee->work_email }}
                                     </div>
                                     <div class="text-xs text-gray-400">
                                         {{ $employee->employee_number }}
