@@ -1,4 +1,4 @@
-# HRMS – Employee Management System
+# HRMS – Employee Management System(ongoing)
 
 A comprehensive **Human Resource Management System (HRMS)** built with **Laravel 10.x**, designed to streamline HR operations including employee management, leave tracking, attendance, complaints, policies, surveys, and more.
 
