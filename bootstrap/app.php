@@ -16,12 +16,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
             'manager' => \App\Http\Middleware\EnsureUserIsManager::class,
             'active_employee' => \App\Http\Middleware\CheckEmployeeStatus::class,
-            'force.password.reset' => \App\Http\Middleware\ForcePasswordReset::class,
+            'force_password_reset' => \App\Http\Middleware\ForcePasswordReset::class,
         ]);
     })
-    ->withMiddleware(function (Middleware $middleware) {
-        $middleware->append(ForcePasswordReset::class);
-    })
+    
     ->withExceptions(function (Exceptions $exceptions): void {
         //
     })->create();
