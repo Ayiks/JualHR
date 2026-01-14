@@ -108,6 +108,7 @@ class EmployeeController extends Controller
                 'user_id' => $user->id,
                 'employee_number' => $employeeNumber,
                 'first_name' => $request->first_name,
+                'name' => $request->first_name . ' ' . $request->middle_name . ' ' . $request->last_name,
                 'last_name' => $request->last_name,
                 'middle_name' => $request->middle_name,
                 'full_name' => $request->first_name . ' ' . $request->middle_name . ' ' . $request->last_name,
