@@ -34,7 +34,6 @@ class Employee extends Model
         'job_title',
         'work_email',
         'work_phone',
-        'cell_phone',
         'employment_type',
         'employment_status',
         'date_of_joining',
