@@ -18,8 +18,6 @@ use Illuminate\Support\Facades\Cache;
 
 class EmployeeController extends Controller
 {
-    const DEFAULT_PASSWORD = 'JGGLDefault@2025';
-
     public function index(Request $request)
     {
         $query = Employee::with(['department', 'lineManager']);
@@ -85,9 +83,8 @@ class EmployeeController extends Controller
             $user = User::create([
                 'name' => $request->first_name . ' ' . $request->middle_name . ' ' . $request->last_name,
                 'email' => $request->work_email,
-                'password' => Hash::make(self::DEFAULT_PASSWORD),
+                'password' => Hash::make($request->password),
                 'email_verified_at' => now(),
-                'force_password_reset' => true, // Force password reset on first login
             ]);
 
             // Assign role
@@ -110,85 +107,20 @@ class EmployeeController extends Controller
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
                 'middle_name' => $request->middle_name,
-                'full_name' => $request->first_name . ' ' . $request->middle_name . ' ' . $request->last_name,
                 'email' => $request->email,
                 'phone' => $request->phone,
-                'ssnit_number' => $request->ssnit_number,
-                'ghana_card_number' => $request->ghana_card_number,
-                'tin_number' => $request->tin_number,
-                'date_of_birth' => $request->date_of_birth,
-                'gender' => $request->gender,
-                'marital_status' => $request->marital_status,
-                'address' => $request->address,
-                'city' => $request->city,
-                'state' => $request->state,
-                'country' => $request->country,
-                'postal_code' => $request->postal_code,
+                
                 'department_id' => $request->department_id,
                 'line_manager_id' => $request->line_manager_id,
                 'job_title' => $request->job_title,
                 'work_email' => $request->work_email,
                 'work_phone' => $request->work_phone,
-                'cell_phone' => $request->cell_phone,
                 'employment_type' => $request->employment_type,
                 'employment_status' => $request->employment_status ?? 'active',
                 'date_of_joining' => $request->date_of_joining,
-                'emergency_contact_name' => $request->emergency_contact_name,
-                'emergency_contact_address' => $request->emergency_contact_address,
-                'emergency_contact_phone' => $request->emergency_contact_phone,
-                'emergency_contact_relationship' => $request->emergency_contact_relationship,
-                'bank_name' => $request->bank_name,
-                'bank_branch' => $request->bank_branch,
-                'account_name' => $request->account_name,
-                'account_number' => $request->account_number,
-                'spouse_name' => $request->spouse_name,
-                'spouse_contact' => $request->spouse_contact,
-                'number_of_children' => $request->number_of_children ?? 0,
-                'next_of_kin_name' => $request->next_of_kin_name,
-                'next_of_kin_dob' => $request->next_of_kin_dob,
-                'next_of_kin_sex' => $request->next_of_kin_sex,
-                'profile_photo' => $profilePhotoPath,
+                
             ]);
 
-            // Handle Education Records
-            if ($request->has('education')) {
-                foreach ($request->education as $edu) {
-                    if (!empty($edu['institution_name'])) {
-                        $certificates = [];
-                        
-                        // Handle certificate uploads (max 2 per education entry)
-                        if (isset($edu['certificates'])) {
-                            foreach (array_slice($edu['certificates'], 0, 2) as $file) {
-                                if ($file) {
-                                    $certificates[] = $file->store('education-certificates', 'private');
-                                }
-                            }
-                        }
-
-                        EmployeeEducation::create([
-                            'employee_id' => $employee->id,
-                            'institution_name' => $edu['institution_name'],
-                            'program' => $edu['program'],
-                            'certificate_obtained' => $edu['certificate_obtained'],
-                            'certificates' => $certificates,
-                        ]);
-                    }
-                }
-            }
-
-            // Handle Children Records
-            if ($request->has('children')) {
-                foreach ($request->children as $child) {
-                    if (!empty($child['name'])) {
-                        EmployeeChild::create([
-                            'employee_id' => $employee->id,
-                            'name' => $child['name'],
-                            'date_of_birth' => $child['date_of_birth'],
-                            'sex' => $child['sex'],
-                        ]);
-                    }
-                }
-            }
 
             DB::commit();
             
@@ -197,7 +129,7 @@ class EmployeeController extends Controller
 
             return redirect()
                 ->route('admin.employees.show', $employee)
-                ->with('success', "Employee created successfully! Employee Number: {$employeeNumber}. Default password: " . self::DEFAULT_PASSWORD);
+                ->with('success', "Employee created successfully! Employee Number: {$employeeNumber}. Password was set by you!: " );
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -260,7 +192,6 @@ class EmployeeController extends Controller
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
                 'middle_name' => $request->middle_name,
-                'full_name' => $request->full_name,
                 'email' => $request->email,
                 'phone' => $request->phone,
                 'ssnit_number' => $request->ssnit_number,
@@ -279,7 +210,6 @@ class EmployeeController extends Controller
                 'job_title' => $request->job_title,
                 'work_email' => $request->work_email,
                 'work_phone' => $request->work_phone,
-                'cell_phone' => $request->cell_phone,
                 'employment_type' => $request->employment_type,
                 'employment_status' => $request->employment_status,
                 'date_of_joining' => $request->date_of_joining,
@@ -410,19 +340,19 @@ class EmployeeController extends Controller
     /**
      * Reset employee password to default
      */
-    public function resetPassword(Employee $employee)
-    {
-        try {
-            $employee->user->update([
-                'password' => Hash::make(self::DEFAULT_PASSWORD),
-                'force_password_reset' => true,
-            ]);
+    // public function resetPassword(Employee $employee)
+    // {
+    //     try {
+    //         $employee->user->update([
+    //             'password' => Hash::make(self::DEFAULT_PASSWORD),
+    //             'force_password_reset' => true,
+    //         ]);
 
-            return back()->with('success', 'Password reset to default. Employee must change password on next login.');
-        } catch (\Exception $e) {
-            return back()->with('error', 'Failed to reset password: ' . $e->getMessage());
-        }
-    }
+    //         return back()->with('success', 'Password reset to default. Employee must change password on next login.');
+    //     } catch (\Exception $e) {
+    //         return back()->with('error', 'Failed to reset password: ' . $e->getMessage());
+    //     }
+    // }
     
     /**
      * Get department head for auto-fill
