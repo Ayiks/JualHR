@@ -22,6 +22,11 @@ return new class extends Migration
             $table->string('phone', 20)->nullable();
             $table->date('date_of_birth')->nullable();
             $table->enum('gender', ['male', 'female', 'other'])->nullable();
+            $table->string('ssnit_number')->nullable()->unique();
+            $table->string('ghana_card_number')->nullable()->unique();
+            $table->string('tin_number')->nullable();
+            $table->enum('marital_status', ['single', 'married', 'divorced', 'widowed'])->nullable();
+            
             
             // Address
             $table->text('address')->nullable();
@@ -38,16 +43,36 @@ return new class extends Migration
             $table->enum('employment_status', ['active', 'on_leave', 'suspended', 'terminated', 'resigned'])->default('active');
             $table->date('date_of_joining')->nullable();
             $table->date('date_of_leaving')->nullable();
+            $table->string('work_email')->nullable();
+            $table->string('work_phone')->nullable();
+            
             
             // Emergency Contact
             $table->string('emergency_contact_name')->nullable();
             $table->string('emergency_contact_phone', 20)->nullable();
             $table->string('emergency_contact_relationship', 100)->nullable();
+            $table->text('emergency_contact_address')->nullable();
+
+            // Bank Details
+            $table->string('bank_name')->nullable()->after('emergency_contact_relationship');
+            $table->string('bank_branch')->nullable()->after('bank_name');
+            $table->string('account_name')->nullable()->after('bank_branch');
+            $table->string('account_number')->nullable()->after('account_name');
+            
+            // Family Information
+            $table->string('spouse_name')->nullable();
+            $table->string('spouse_contact')->nullable();
+            $table->integer('number_of_children')->default(0);
+            $table->string('next_of_kin_name')->nullable();
+            $table->date('next_of_kin_dob')->nullable();
+            $table->enum('next_of_kin_sex', ['male', 'female'])->nullable();
             
             // Other
             $table->string('profile_photo')->nullable();
             $table->timestamps();
             $table->softDeletes();
+            $table->boolean('profile_completed')->default(false);
+
             
             // Indexes
             $table->index('employee_number');
