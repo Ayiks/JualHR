@@ -1,4 +1,3 @@
-
 @extends('layouts.app')
 
 @section('title', 'My Dashboard')
@@ -7,15 +6,20 @@
 
 @section('content')
 <!-- Profile Overview -->
+
+
+<!-- Profile Completion Alert - Shows if profile not complete -->
+<x-profile-completion-alert :employee="$employee" />
+
 <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-sm p-6 text-white mb-6">
     <div class="flex items-center gap-6">
         <div class="flex-shrink-0">
             @if($employee->profile_photo)
-                <img class="w-20 h-20 rounded-full ring-4 ring-white ring-opacity-50" src="{{ Storage::url($employee->profile_photo) }}" alt="{{ $employee->full_name }}">
+            <img class="w-20 h-20 rounded-full ring-4 ring-white ring-opacity-50" src="{{ Storage::url($employee->profile_photo) }}" alt="{{ $employee->full_name }}">
             @else
-                <div class="w-20 h-20 rounded-full bg-white bg-opacity-20 ring-4 ring-white ring-opacity-50 flex items-center justify-center text-white font-bold text-2xl">
-                    {{ $employee->initials }}
-                </div>
+            <div class="w-20 h-20 rounded-full bg-white bg-opacity-20 ring-4 ring-white ring-opacity-50 flex items-center justify-center text-white font-bold text-2xl">
+                {{ $employee->initials }}
+            </div>
             @endif
         </div>
         <div class="flex-1">
@@ -36,7 +40,7 @@
                 </span>
             </div>
         </div>
-        <a href="{{ route('employee.profile.show') }}" 
+        <a href="{{ route('employee.profile.show') }}"
             class="px-4 py-2 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg text-sm font-medium transition-colors">
             View Profile
         </a>
@@ -45,7 +49,7 @@
 
 <!-- Quick Links Grid -->
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-    <a href="{{ route('employee.profile.show') }}" 
+    <a href="{{ route('employee.profile.show') }}"
         class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md hover:border-blue-200 transition-all group">
         <div class="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center mb-4 group-hover:bg-blue-100 transition-colors">
             <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
