@@ -6,7 +6,7 @@
 
 @section('content')
 <div class="space-y-6">
-    <!-- Leave Balances -->
+    <!-- Leave Balances dfault-->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         @forelse($leaveBalances as $balance)
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
