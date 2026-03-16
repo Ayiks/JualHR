@@ -30,7 +30,6 @@ class UserSeeder extends Seeder
         ]);
 
         $superAdmin = Employee::create([
-            'name' => 'System Administrator',
             'user_id' => $superAdminUser->id,
             'employee_number' => 'JGGL001', // Using JGGL format
             
@@ -101,7 +100,6 @@ class UserSeeder extends Seeder
         ]);
 
         $hrAdmin = Employee::create([
-            'name' => 'HR Manager',
             'user_id' => $hrAdminUser->id,
             'employee_number' => 'JGGL002',
             
@@ -172,7 +170,6 @@ class UserSeeder extends Seeder
         ]);
 
         $manager = Employee::create([
-             'name' => 'John Asante',
             'user_id' => $managerUser->id,
             'employee_number' => 'JGGL003',
             
@@ -243,7 +240,6 @@ class UserSeeder extends Seeder
         ]);
 
         $employee = Employee::create([
-            'name' => 'Jane Osei',
             'user_id' => $employeeUser->id,
             'employee_number' => 'JGGL004',
             
