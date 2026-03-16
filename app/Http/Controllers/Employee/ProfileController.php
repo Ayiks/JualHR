@@ -66,8 +66,10 @@ class ProfileController extends Controller
         // Validate - employees can only update certain fields
         $validated = $request->validate([
             'phone' => ['nullable', 'string', 'max:20'],
-            'cell_phone' => ['nullable', 'string', 'max:20'],
             'email' => ['nullable', 'email', 'unique:employees,email,' . $employee->id],
+            'date_of_birth' => ['nullable', 'date', 'before:today'],
+            'gender' => ['nullable', 'in:male,female,other'],
+            'marital_status' => ['nullable', 'in:single,married,divorced,widowed'],
             'address' => ['nullable', 'string'],
             'city' => ['nullable', 'string', 'max:100'],
             'state' => ['nullable', 'string', 'max:100'],
@@ -77,6 +79,16 @@ class ProfileController extends Controller
             'emergency_contact_address' => ['nullable', 'string'],
             'emergency_contact_phone' => ['nullable', 'string', 'max:20'],
             'emergency_contact_relationship' => ['nullable', 'string', 'max:100'],
+            'bank_name' => ['nullable', 'string', 'max:255'],
+            'bank_branch' => ['nullable', 'string', 'max:255'],
+            'account_name' => ['nullable', 'string', 'max:255'],
+            'account_number' => ['nullable', 'string', 'max:50'],
+            'spouse_name' => ['nullable', 'string', 'max:255'],
+            'spouse_contact' => ['nullable', 'string', 'max:20'],
+            'number_of_children' => ['nullable', 'integer', 'min:0'],
+            'next_of_kin_name' => ['nullable', 'string', 'max:255'],
+            'next_of_kin_dob' => ['nullable', 'date'],
+            'next_of_kin_sex' => ['nullable', 'in:male,female,other'],
             'profile_photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
         ]);
 

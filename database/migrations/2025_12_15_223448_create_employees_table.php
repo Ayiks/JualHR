@@ -54,10 +54,10 @@ return new class extends Migration
             $table->text('emergency_contact_address')->nullable();
 
             // Bank Details
-            $table->string('bank_name')->nullable()->after('emergency_contact_relationship');
-            $table->string('bank_branch')->nullable()->after('bank_name');
-            $table->string('account_name')->nullable()->after('bank_branch');
-            $table->string('account_number')->nullable()->after('account_name');
+            $table->string('bank_name')->nullable();
+            $table->string('bank_branch')->nullable();
+            $table->string('account_name')->nullable();
+            $table->string('account_number')->nullable();
             
             // Family Information
             $table->string('spouse_name')->nullable();

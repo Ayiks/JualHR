@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::dropIfExists('query_responses');
         Schema::create('query_responses', function (Blueprint $table) {
             $table->id();
             $table->foreignId('query_id')->constrained()->cascadeOnDelete();

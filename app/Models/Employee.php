@@ -16,6 +16,7 @@ class Employee extends Model
         'first_name',
         'last_name',
         'middle_name',
+        'full_name',
         'email',
         'phone',
         'ssnit_number',
@@ -34,6 +35,7 @@ class Employee extends Model
         'job_title',
         'work_email',
         'work_phone',
+        'cell_phone',
         'employment_type',
         'employment_status',
         'date_of_joining',
@@ -200,6 +202,55 @@ class Employee extends Model
     public function getIsActiveAttribute()
     {
         return $this->employment_status === 'active';
+    }
+
+    public function getProfileCompletedAttribute(): bool
+    {
+        return $this->getProfileCompletionPercentageAttribute() === 100;
+    }
+
+    public function getProfileCompletionPercentageAttribute(): int
+    {
+        $requiredFields = [
+            'date_of_birth',
+            'gender',
+            'phone',
+            'address',
+            'city',
+            'state',
+            'country',
+            'postal_code',
+            'emergency_contact_name',
+            'emergency_contact_phone',
+            'bank_name',
+            'account_number',
+            'bank_branch',
+        ];
+
+        $filled = collect($requiredFields)->filter(fn($field) => !empty($this->$field))->count();
+
+        return (int) round(($filled / count($requiredFields)) * 100);
+    }
+
+    public function getMissingProfileFieldsAttribute(): array
+    {
+        $fields = [
+            'date_of_birth' => 'Date of birth',
+            'gender' => 'Gender',
+            'phone' => 'Phone number',
+            'address' => 'Street address',
+            'city' => 'City',
+            'state' => 'State / Region',
+            'country' => 'Country',
+            'postal_code' => 'Postal code',
+            'emergency_contact_name' => 'Emergency contact name',
+            'emergency_contact_phone' => 'Emergency contact phone',
+            'bank_name' => 'Bank name',
+            'account_number' => 'Account number',
+            'bank_branch' => 'Bank branch',
+        ];
+
+        return collect($fields)->filter(fn($label, $field) => empty($this->$field))->values()->all();
     }
 
     // Helper Methods

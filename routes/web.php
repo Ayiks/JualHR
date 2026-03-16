@@ -173,12 +173,10 @@ Route::middleware(['auth', 'active_employee'])->group(function () {
         Route::get('/report', [ManagerAttendanceController::class, 'report'])->name('report');
         });
         
-        // Leave Approvals
+        // Team Leave Schedule (view only — approvals are handled by HR Admin)
         Route::prefix('leaves')->name('leaves.')->group(function () {
-            Route::get('/pending', [LeaveApprovalController::class, 'pending'])->name('pending');
+            Route::get('/', [LeaveApprovalController::class, 'index'])->name('index');
             Route::get('/{leave}', [LeaveApprovalController::class, 'show'])->name('show');
-            Route::put('/{leave}/approve', [LeaveApprovalController::class, 'approve'])->name('approve');
-            Route::put('/{leave}/reject', [LeaveApprovalController::class, 'reject'])->name('reject');
         });
     });
     
