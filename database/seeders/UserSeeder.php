@@ -12,6 +12,12 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
+        // Skip if already seeded to allow safe re-runs
+        if (User::where('email', 'admin@jggl.com')->exists()) {
+            $this->command->info('Users already seeded — skipping.');
+            return;
+        }
+
         // =====================================================================
         // 1. SUPER ADMIN
         // =====================================================================

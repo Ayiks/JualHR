@@ -69,18 +69,18 @@ class RoleSeeder extends Seeder
         ];
 
         foreach ($permissions as $permission) {
-            Permission::create(['name' => $permission]);
+            Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
         }
 
         // Create Roles and Assign Permissions
 
         // Super Admin - All Permissions
-        $superAdmin = Role::create(['name' => 'super_admin']);
-        $superAdmin->givePermissionTo(Permission::all());
+        $superAdmin = Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
+        $superAdmin->syncPermissions(Permission::all());
 
         // HR Admin - HR Operations
-        $hrAdmin = Role::create(['name' => 'hr_admin']);
-        $hrAdmin->givePermissionTo([
+        $hrAdmin = Role::firstOrCreate(['name' => 'hr_admin', 'guard_name' => 'web']);
+        $hrAdmin->syncPermissions([
             'view_employees',
             'create_employees',
             'edit_employees',
@@ -114,8 +114,8 @@ class RoleSeeder extends Seeder
         ]);
 
         // Line Manager - Team Management
-        $lineManager = Role::create(['name' => 'line_manager']);
-        $lineManager->givePermissionTo([
+        $lineManager = Role::firstOrCreate(['name' => 'line_manager', 'guard_name' => 'web']);
+        $lineManager->syncPermissions([
             'view_employees',
             'approve_leaves',
             'reject_leaves',
@@ -124,8 +124,8 @@ class RoleSeeder extends Seeder
         ]);
 
         // Employee - Self Service
-        $employee = Role::create(['name' => 'employee']);
-        $employee->givePermissionTo([
+        $employee = Role::firstOrCreate(['name' => 'employee', 'guard_name' => 'web']);
+        $employee->syncPermissions([
             'view_policies',
             'respond_to_queries',
         ]);
