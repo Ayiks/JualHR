@@ -89,6 +89,51 @@
                     @enderror
                 </div>
 
+                {{-- Job Title --}}
+                <div>
+                    <label for="job_title" class="block text-sm font-medium text-gray-700 mb-2">
+                        Job Title <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" name="job_title" id="job_title"
+                           value="{{ old('job_title') }}" required
+                           class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                           placeholder="e.g., Sales Executive">
+                    @error('job_title')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                {{-- Employment Type --}}
+                <div>
+                    <label for="employment_type" class="block text-sm font-medium text-gray-700 mb-2">
+                        Employment Type <span class="text-red-500">*</span>
+                    </label>
+                    <select name="employment_type" id="employment_type" required
+                            class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                        <option value="">Select Employment Type</option>
+                        <option value="full_time" {{ old('employment_type') === 'full_time' ? 'selected' : '' }}>Full Time</option>
+                        <option value="part_time" {{ old('employment_type') === 'part_time' ? 'selected' : '' }}>Part Time</option>
+                        <option value="contract" {{ old('employment_type') === 'contract' ? 'selected' : '' }}>Contract</option>
+                        <option value="intern" {{ old('employment_type') === 'intern' ? 'selected' : '' }}>Intern</option>
+                    </select>
+                    @error('employment_type')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                {{-- Date of Joining --}}
+                <div>
+                    <label for="date_of_joining" class="block text-sm font-medium text-gray-700 mb-2">
+                        Date of Joining <span class="text-red-500">*</span>
+                    </label>
+                    <input type="date" name="date_of_joining" id="date_of_joining"
+                           value="{{ old('date_of_joining') }}" required
+                           class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                    @error('date_of_joining')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
                 {{-- Default Password --}}
                 <div>
                     <label for="password" class="block text-sm font-medium text-gray-700 mb-2">

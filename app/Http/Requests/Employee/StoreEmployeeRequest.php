@@ -14,70 +14,76 @@ class StoreEmployeeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // Personal Information
-            // 'full_name' => ['required', 'string', 'max:255'],
+            // Required: core identity & login
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
             'middle_name' => ['nullable', 'string', 'max:255'],
-            'address' => ['required', 'string'],
-            'phone' => ['required', 'string', 'max:20'],
-            'ssnit_number' => ['required', 'string', 'unique:employees,ssnit_number'],
-            'ghana_card_number' => ['required', 'string', 'unique:employees,ghana_card_number'],
-            'tin_number' => ['nullable', 'string'],
-            'date_of_birth' => ['required', 'date', 'before:today'],
-            'gender' => ['required', 'in:male,female'],
-            'marital_status' => ['required', 'in:single,married,divorced,widowed'],
-            'profile_photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
-            
-            // Job Information
+            'work_email' => ['required', 'email', 'unique:users,email', 'unique:employees,work_email'],
+            'password' => ['required', 'string', 'min:8'],
+            'role' => ['required', 'in:employee,line_manager,hr_admin,super_admin'],
+
+            // Required: job details
             'job_title' => ['required', 'string', 'max:255'],
             'department_id' => ['required', 'exists:departments,id'],
-            'work_email' => ['required', 'email', 'unique:users,email', 'unique:employees,work_email'],
-            'email' => ['nullable', 'email', 'unique:employees,email'],
-            'work_phone' => ['required', 'string', 'max:20'],
-            'cell_phone' => ['required', 'string', 'max:20'],
             'employment_type' => ['required', 'in:full_time,part_time,contract,intern'],
-            'employment_status' => ['nullable', 'in:active,inactive,terminated,resigned'],
             'date_of_joining' => ['required', 'date'],
+
+            // Optional: employee fills in themselves later
+            'employment_status' => ['nullable', 'in:active,inactive,terminated,resigned'],
             'line_manager_id' => ['nullable', 'exists:employees,id'],
-            'role' => ['required', 'in:employee,line_manager,hr_admin,super_admin'],
-            
-            // Education
-            'education' => ['nullable', 'array'],
-            'education.*.institution_name' => ['required_with:education.*', 'string', 'max:255'],
-            'education.*.program' => ['required_with:education.*', 'string', 'max:255'],
-            'education.*.certificate_obtained' => ['required_with:education.*', 'string', 'max:255'],
-            'education.*.certificates.*' => ['nullable', 'file', 'mimes:pdf', 'max:10240'], // 10MB
-            
-            // Emergency Contact
-            'emergency_contact_name' => ['required', 'string', 'max:255'],
-            'emergency_contact_address' => ['required', 'string'],
-            'emergency_contact_phone' => ['required', 'string', 'max:20'],
-            'emergency_contact_relationship' => ['required', 'string', 'max:100'],
-            
-            // Bank Details
-            'bank_name' => ['required', 'string', 'max:255'],
-            'bank_branch' => ['required', 'string', 'max:255'],
-            'account_name' => ['required', 'string', 'max:255'],
-            'account_number' => ['required', 'string', 'max:50'],
-            
-            // Family
-            'spouse_name' => ['nullable', 'string', 'max:255'],
-            'spouse_contact' => ['nullable', 'string', 'max:20'],
-            'number_of_children' => ['nullable', 'integer', 'min:0', 'max:20'],
-            'children' => ['nullable', 'array'],
-            'children.*.name' => ['required_with:children.*', 'string', 'max:255'],
-            'children.*.date_of_birth' => ['required_with:children.*', 'date', 'before:today'],
-            'children.*.sex' => ['required_with:children.*', 'in:male,female'],
-            'next_of_kin_name' => ['required', 'string', 'max:255'],
-            'next_of_kin_dob' => ['required', 'date', 'before:today'],
-            'next_of_kin_sex' => ['required', 'in:male,female'],
-            
-            // Address fields (optional)
+            'email' => ['nullable', 'email', 'unique:employees,email'],
+            'work_phone' => ['nullable', 'string', 'max:20'],
+            'cell_phone' => ['nullable', 'string', 'max:20'],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'profile_photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
+
+            // Personal — employee fills in
+            'ssnit_number' => ['nullable', 'string', 'unique:employees,ssnit_number'],
+            'ghana_card_number' => ['nullable', 'string', 'unique:employees,ghana_card_number'],
+            'tin_number' => ['nullable', 'string'],
+            'date_of_birth' => ['nullable', 'date', 'before:today'],
+            'gender' => ['nullable', 'in:male,female'],
+            'marital_status' => ['nullable', 'in:single,married,divorced,widowed'],
+
+            // Address — employee fills in
+            'address' => ['nullable', 'string'],
             'city' => ['nullable', 'string', 'max:100'],
             'state' => ['nullable', 'string', 'max:100'],
             'country' => ['nullable', 'string', 'max:100'],
             'postal_code' => ['nullable', 'string', 'max:20'],
+
+            // Emergency Contact — employee fills in
+            'emergency_contact_name' => ['nullable', 'string', 'max:255'],
+            'emergency_contact_address' => ['nullable', 'string'],
+            'emergency_contact_phone' => ['nullable', 'string', 'max:20'],
+            'emergency_contact_relationship' => ['nullable', 'string', 'max:100'],
+
+            // Bank Details — employee fills in
+            'bank_name' => ['nullable', 'string', 'max:255'],
+            'bank_branch' => ['nullable', 'string', 'max:255'],
+            'account_name' => ['nullable', 'string', 'max:255'],
+            'account_number' => ['nullable', 'string', 'max:50'],
+
+            // Family — employee fills in
+            'spouse_name' => ['nullable', 'string', 'max:255'],
+            'spouse_contact' => ['nullable', 'string', 'max:20'],
+            'number_of_children' => ['nullable', 'integer', 'min:0', 'max:20'],
+            'next_of_kin_name' => ['nullable', 'string', 'max:255'],
+            'next_of_kin_dob' => ['nullable', 'date', 'before:today'],
+            'next_of_kin_sex' => ['nullable', 'in:male,female'],
+
+            // Education — optional
+            'education' => ['nullable', 'array'],
+            'education.*.institution_name' => ['required_with:education.*', 'string', 'max:255'],
+            'education.*.program' => ['required_with:education.*', 'string', 'max:255'],
+            'education.*.certificate_obtained' => ['required_with:education.*', 'string', 'max:255'],
+            'education.*.certificates.*' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
+
+            // Children — optional
+            'children' => ['nullable', 'array'],
+            'children.*.name' => ['required_with:children.*', 'string', 'max:255'],
+            'children.*.date_of_birth' => ['required_with:children.*', 'date', 'before:today'],
+            'children.*.sex' => ['required_with:children.*', 'in:male,female'],
         ];
     }
 
